@@ -587,7 +587,7 @@ class RoomRoom(models.Model):
                 'name': o.name,
                 'complete_name': o.complete_name or o.name,
                 'parent_id': o.parent_id.id if o.parent_id else None,
-                'location_type': o.location_type,
+                'location_type': (o.location_type_id.name or '').lower().replace(' ', '_'),
                 'depth': (o.parent_path or '').strip('/').count('/'),
                 'slot_count': total,
                 'free_count': free,

@@ -4,6 +4,16 @@
 from odoo import api, fields, models
 
 
+class RoomLocationType(models.Model):
+    _name = 'room.location.type'
+    _description = "Parking Location Type"
+    _order = "sequence, name"
+
+    name = fields.Char(string="Type", required=True, translate=True)
+    sequence = fields.Integer(default=10)
+    active = fields.Boolean(default=True)
+
+
 class RoomOffice(models.Model):
     _name = 'room.office'
     _description = "Parking Location"
@@ -19,13 +29,11 @@ class RoomOffice(models.Model):
         store=True,
         recursive=True,
     )
-    location_type = fields.Selection([
-        ('head_office', 'Head Office'),
-        ('branch',      'Branch'),
-        ('building',    'Building'),
-        ('floor',       'Floor'),
-        ('zone',        'Zone'),
-    ], string="Type", default='branch', required=True)
+    location_type_id = fields.Many2one(
+        "room.location.type", string="Type",
+        default=lambda self: self.env.ref('room.location_type_branch', raise_if_not_found=False),
+        ondelete="restrict",
+    )
 
     parent_id = fields.Many2one(
         "room.office", string="Parent Location",

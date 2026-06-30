@@ -1,6 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_room_office_user,access.room.office.user,room.model_room_office,base.group_user,1,0,0,0
 access_room_office_manager,access.room.office.manager,room.model_room_office,room.group_parking_manager,1,1,1,1
+access_room_location_type_user,access.room.location.type.user,room.model_room_location_type,base.group_user,1,0,0,0
+access_room_location_type_manager,access.room.location.type.manager,room.model_room_location_type,room.group_parking_manager,1,1,1,1
 access_room_room_user,access.room.room.user,room.model_room_room,base.group_user,1,0,0,0
 access_room_room_manager,access.room.room.manager,room.model_room_room,room.group_parking_manager,1,1,1,1
 access_room_booking_user,access.room.booking.user,room.model_room_booking,base.group_user,1,1,1,1

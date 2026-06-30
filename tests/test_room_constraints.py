@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from psycopg2 import IntegrityError
 
+from odoo import fields
 from odoo.addons.room.tests.common import RoomCommon
 from odoo.exceptions import ValidationError
 from odoo.tests.common import tagged
@@ -46,6 +47,42 @@ class TestRoomConstraints(RoomCommon):
                 "start_datetime": datetime(2023, 5, 15, 10, 0),
                 "stop_datetime": datetime(2023, 5, 15, 9, 0),
             })
+
+    def test_no_past_booking(self):
+        """Employees can't book a start time in the past; managers/admins bypass."""
+        Booking = self.env["room.booking"]
+        employee = self.env["res.users"].create({
+            "name": "Parker Emp",
+            "login": "parker_emp",
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])],
+        })
+        past = datetime(2020, 1, 1, 10, 0)
+        future = fields.Datetime.now() + timedelta(days=1)
+
+        # Employee: a past start is rejected
+        with self.assertRaises(ValidationError, msg="Employees may not book in the past"):
+            Booking.with_user(employee).create({
+                "name": "Past booking",
+                "room_id": self.rooms[1].id,
+                "start_datetime": past,
+                "stop_datetime": past + timedelta(hours=1),
+            })
+
+        # Employee: a near-future start is allowed
+        Booking.with_user(employee).create({
+            "name": "Future booking",
+            "room_id": self.rooms[1].id,
+            "start_datetime": future,
+            "stop_datetime": future + timedelta(hours=1),
+        })
+
+        # Manager/admin bypass: a past start is allowed for the superuser
+        Booking.create({
+            "name": "Admin past booking",
+            "room_id": self.rooms[1].id,
+            "start_datetime": past + timedelta(hours=2),
+            "stop_datetime": past + timedelta(hours=3),
+        })
 
     @mute_logger('odoo.sql_db')
     def test_room_constraints(self):

@@ -139,6 +139,14 @@
         parent="room.room_parking_menu"
         sequence="2"/>
 
+    <menuitem
+        id="room_location_type_menu"
+        name="Location Types"
+        action="room.action_room_location_type"
+        parent="room.room_parking_menu"
+        sequence="3"
+        groups="room.group_parking_manager,base.group_system"/>
+
     <!-- ── 5. Analytics (managers + admins only — employees don't see it) ── -->
     <menuitem
         id="room_analytics_menu"

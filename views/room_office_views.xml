@@ -11,11 +11,7 @@
                        options="{'size': [72, 54], 'preview_image': 'image_1920', 'zoom': true}"
                        string="Map"/>
                 <field name="complete_name" string="Location Name"/>
-                <field name="location_type" widget="badge"
-                       decoration-info="location_type == 'head_office'"
-                       decoration-success="location_type == 'branch'"
-                       decoration-warning="location_type == 'zone'"
-                       decoration-muted="location_type in ('floor','building')"/>
+                <field name="location_type_id" widget="badge"/>
                 <field name="parent_id" string="Parent" optional="show"/>
                 <field name="responsible_id" widget="many2one_avatar_user" string="Responsible"/>
                 <field name="total_slot_count" string="Slots"/>
@@ -78,7 +74,7 @@
 
                     <group>
                         <group string="Location Details">
-                            <field name="location_type"/>
+                            <field name="location_type_id"/>
                             <field name="parent_id" placeholder="Leave empty for top-level"/>
                             <field name="complete_name" readonly="1"/>
                             <field name="company_id"
@@ -106,7 +102,7 @@
                             <field name="child_ids">
                                 <list>
                                     <field name="name" string="Name"/>
-                                    <field name="location_type" widget="badge"/>
+                                    <field name="location_type_id" widget="badge"/>
                                     <field name="responsible_id" widget="many2one_avatar_user"/>
                                     <field name="total_slot_count" string="Slots"/>
                                     <field name="active_booking_count" string="Active Now"/>
@@ -128,6 +124,29 @@
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Create your first Parking Location</p>
             <p>Define locations and nest them under a parent to build a hierarchy.</p>
+        </field>
+    </record>
+
+    <!-- ── Location Type (configurable list) ─────────────────────────────── -->
+    <record id="room_location_type_view_list" model="ir.ui.view">
+        <field name="name">room.location.type.view.list</field>
+        <field name="model">room.location.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_room_location_type" model="ir.actions.act_window">
+        <field name="name">Location Types</field>
+        <field name="res_model">room.location.type</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a parking location type</p>
+            <p>Types appear in the Type dropdown on every parking location.</p>
         </field>
     </record>
 

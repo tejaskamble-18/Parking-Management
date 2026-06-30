@@ -17,6 +17,7 @@ from odoo.addons.room.services import AllocationService, GraphService, Notificat
 
 # Fairness / anti-abuse limits. Adjust here if policy changes.
 MAX_ADVANCE_BOOKING_DAYS = 15       # employees can't book further than this
+PAST_BOOKING_GRACE_MINUTES = 5      # employees can't book in the past (grace absorbs "now"/clock skew)
 CHECK_IN_WINDOW_MINUTES = 15        # check-in opens only 15 min before start
 
 
@@ -233,6 +234,25 @@ class RoomBooking(models.Model):
                     "Please pick a date on or before %(limit)s.",
                     days=MAX_ADVANCE_BOOKING_DAYS,
                     limit=fields.Datetime.context_timestamp(booking, limit).strftime('%Y-%m-%d'),
+                ))
+
+    @api.constrains("start_datetime")
+    def _check_no_past_booking(self):
+        """Employees can't book a start time in the past. A small grace window
+        absorbs the Quick Book "now" preset and minor clock skew. Recurrence
+        children and manager / admin overrides bypass the rule."""
+        user = self.env.user
+        if user.has_group('room.group_parking_manager') or user.has_group('base.group_system'):
+            return
+        floor = fields.Datetime.now() - timedelta(minutes=PAST_BOOKING_GRACE_MINUTES)
+        for booking in self:
+            if booking.parent_booking_id or booking.is_recurring:
+                continue
+            if booking.start_datetime and booking.start_datetime < floor:
+                raise ValidationError(_(
+                    "Parking can't be booked in the past. Please pick a start "
+                    "time no earlier than %(limit)s.",
+                    limit=fields.Datetime.context_timestamp(booking, floor).strftime('%Y-%m-%d %H:%M'),
                 ))
 
     @api.constrains("organizer_id", "start_datetime", "stop_datetime")
