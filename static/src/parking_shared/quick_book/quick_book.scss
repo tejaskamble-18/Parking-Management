@@ -1,0 +1,137 @@
+/* Quick Book dialog — compact, product-grade. */
+
+.o_quick_book_dialog {
+    .modal-body { padding: 0; }
+}
+
+.o_qb_body {
+    padding: 18px 20px 8px;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ps-text, #0F172A);
+
+    .o_qb_sub {
+        color: var(--ps-muted, #64748B);
+        margin: 0 0 14px;
+        font-size: 13px;
+    }
+
+    .o_qb_preset_row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .o_qb_chip {
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #0F172A;
+        display: inline-flex; align-items: center; gap: 6px;
+        cursor: pointer;
+        transition: background .12s, transform .12s;
+        i { color: #2563EB; }
+        &:hover { background: #E0E7FF; transform: translateY(-1px); }
+    }
+
+    .o_qb_field_row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .o_qb_field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+        span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        input {
+            padding: 9px 10px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color .12s, box-shadow .12s;
+            &:focus {
+                outline: none;
+                border-color: #2563EB;
+                box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+            }
+        }
+    }
+
+    .o_qb_prefs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .o_qb_pref {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        display: inline-flex; align-items: center; gap: 6px;
+        cursor: pointer;
+        transition: all .12s;
+        i { color: #64748B; }
+        &:hover { border-color: #CBD5E1; }
+        &.o_active {
+            background: #EFF6FF;
+            border-color: #2563EB;
+            color: #1D4ED8;
+            i { color: #2563EB; }
+        }
+    }
+    .o_qb_office {
+        flex: 1 1 180px;
+        min-width: 140px;
+        padding: 7px 28px 7px 10px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 13px;
+        background-color: #FFFFFF;
+        &:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+        }
+    }
+
+    .o_qb_error {
+        margin-top: 12px;
+        padding: 10px 12px;
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #991B1B;
+        border-radius: 8px;
+        font-size: 13px;
+        i { color: #DC2626; margin-right: 6px; }
+    }
+}
+
+.o_qb_submit {
+    min-width: 120px;
+    i { margin-right: 6px; }
+}
+
+/* Mobile — one column, bigger tap targets. */
+@media (max-width: 640px) {
+    .o_qb_body {
+        .o_qb_field_row { grid-template-columns: 1fr; }
+        .o_qb_chip { padding: 8px 14px; }
+        .o_qb_pref { padding: 9px 14px; }
+        input, select { font-size: 16px; } /* stop iOS zoom */
+    }
+}

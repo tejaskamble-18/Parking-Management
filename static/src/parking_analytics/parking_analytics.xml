@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.ParkingAnalytics">
+        <div class="o_parking_analytics">
+            <t t-if="state.loading and !state.data">
+                <div class="o_ps_skeleton_page">
+                    <div class="o_ps_skeleton o_ps_sk_header"/>
+                    <div class="o_ps_skeleton o_ps_sk_subheader"/>
+                    <div class="o_ps_sk_kpi_row">
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                    </div>
+                    <div class="o_ps_sk_chart_row">
+                        <div class="o_ps_skeleton o_ps_sk_chart"/>
+                        <div class="o_ps_skeleton o_ps_sk_chart"/>
+                    </div>
+                    <div class="o_ps_sk_chart_row">
+                        <div class="o_ps_skeleton o_ps_sk_chart"/>
+                        <div class="o_ps_skeleton o_ps_sk_chart"/>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+
+                <!-- ── Header ── -->
+                <div class="o_pa_header">
+                    <div class="o_pa_header_text">
+                        <h1>Analytics Dashboard</h1>
+                        <p>Parking usage insights and trends</p>
+                    </div>
+                    <div class="o_pa_header_controls">
+                        <LocationPicker
+                            offices="state.offices"
+                            selectedId="state.selectedOfficeId"
+                            onChange="(id) => this.onLocationPick(id)"
+                            theme="'light'"/>
+                        <div class="o_pa_range_tabs">
+                            <button t-att-class="'o_pa_range_tab' + (state.rangeDays === 7 ? ' active' : '')"
+                                    t-on-click="() => { state.rangeDays = 7; _reload(); }">7d</button>
+                            <button t-att-class="'o_pa_range_tab' + (state.rangeDays === 30 ? ' active' : '')"
+                                    t-on-click="() => { state.rangeDays = 30; _reload(); }">30d</button>
+                            <button t-att-class="'o_pa_range_tab' + (state.rangeDays === 90 ? ' active' : '')"
+                                    t-on-click="() => { state.rangeDays = 90; _reload(); }">90d</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── KPI row ── -->
+                <div class="o_pa_kpi_row o_ps_fade_stagger">
+                    <div class="o_pa_kpi_card o_pa_kpi_blue">
+                        <div class="o_pa_kpi_icon"><i class="fa fa-calendar-check-o"/></div>
+                        <div class="o_pa_kpi_body">
+                            <div class="o_pa_kpi_value"><AnimatedCounter value="state.data.kpi.total_bookings"/></div>
+                            <div class="o_pa_kpi_label">Total Bookings</div>
+                        </div>
+                    </div>
+                    <div class="o_pa_kpi_card o_pa_kpi_purple">
+                        <div class="o_pa_kpi_icon"><i class="fa fa-pie-chart"/></div>
+                        <div class="o_pa_kpi_body">
+                            <div class="o_pa_kpi_value"><AnimatedCounter value="state.data.kpi.utilization" suffix="'%'"/></div>
+                            <div class="o_pa_kpi_label">Utilization Rate</div>
+                        </div>
+                    </div>
+                    <div class="o_pa_kpi_card o_pa_kpi_teal">
+                        <div class="o_pa_kpi_icon"><i class="fa fa-users"/></div>
+                        <div class="o_pa_kpi_body">
+                            <div class="o_pa_kpi_value"><AnimatedCounter value="state.data.kpi.active_users"/></div>
+                            <div class="o_pa_kpi_label">Active Users</div>
+                        </div>
+                    </div>
+                    <div class="o_pa_kpi_card o_pa_kpi_amber">
+                        <div class="o_pa_kpi_icon"><i class="fa fa-clock-o"/></div>
+                        <div class="o_pa_kpi_body">
+                            <div class="o_pa_kpi_value"><AnimatedCounter value="state.data.kpi.avg_duration" suffix="'h'" decimals="1"/></div>
+                            <div class="o_pa_kpi_label">Avg. Duration</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Row: 3 compact charts ── -->
+                <div class="o_pa_row_3">
+                    <div class="o_pa_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title">Peak Usage Hours</span>
+                            <span class="o_pa_card_sub">Avg vehicles per hour</span>
+                        </div>
+                        <t t-set="peak" t-value="buildAreaChart(state.data.peak_hours.labels, state.data.peak_hours.values, {width:560,height:160,color:'#8B5CF6',fill:'#EDE9FE'})"/>
+                        <svg t-att-viewBox="'0 0 ' + peak.width + ' ' + peak.height" class="o_pa_chart" preserveAspectRatio="none">
+                            <t t-foreach="peak.gridLines" t-as="gl" t-key="gl_index">
+                                <line t-att-x1="peak.padding" t-att-x2="peak.width - peak.padding" t-att-y1="gl.y" t-att-y2="gl.y" stroke="#F1F5F9" stroke-dasharray="4 3"/>
+                                <text t-att-x="peak.padding - 6" t-att-y="gl.y + 4" class="o_pa_axis_text" text-anchor="end" t-esc="gl.v"/>
+                            </t>
+                            <path t-att-d="peak.area" t-att-fill="peak.fill" opacity="0.6"/>
+                            <path t-att-d="peak.path" fill="none" t-att-stroke="peak.color" stroke-width="2" stroke-linejoin="round"/>
+                            <t t-foreach="peak.points" t-as="p" t-key="p_index">
+                                <circle t-att-cx="p.x" t-att-cy="p.y" r="2" t-att-fill="peak.color"/>
+                                <text t-att-x="p.x" t-att-y="peak.height - 8" class="o_pa_axis_text" text-anchor="middle" t-esc="p.label"/>
+                            </t>
+                        </svg>
+                    </div>
+                    <div class="o_pa_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title">Monthly Trend</span>
+                            <span class="o_pa_card_sub">Total bookings per month</span>
+                        </div>
+                        <t t-set="mon" t-value="buildLineChart(state.data.monthly_trend.labels, state.data.monthly_trend.values, {width:560,height:160})"/>
+                        <svg t-att-viewBox="'0 0 ' + mon.width + ' ' + mon.height" class="o_pa_chart" preserveAspectRatio="none">
+                            <t t-foreach="mon.gridLines" t-as="gl" t-key="gl_index">
+                                <line t-att-x1="mon.padding" t-att-x2="mon.width - mon.padding" t-att-y1="gl.y" t-att-y2="gl.y" stroke="#F1F5F9" stroke-dasharray="4 3"/>
+                                <text t-att-x="mon.padding - 6" t-att-y="gl.y + 4" class="o_pa_axis_text" text-anchor="end" t-esc="gl.v"/>
+                            </t>
+                            <path t-att-d="mon.area" t-att-fill="mon.fill" opacity="0.5"/>
+                            <path t-att-d="mon.path" fill="none" t-att-stroke="mon.color" stroke-width="2" stroke-linejoin="round"/>
+                            <t t-foreach="mon.points" t-as="p" t-key="p_index">
+                                <circle t-att-cx="p.x" t-att-cy="p.y" r="3" t-att-fill="mon.color"/>
+                                <text t-att-x="p.x" t-att-y="mon.height - 8" class="o_pa_axis_text" text-anchor="middle" t-esc="p.label"/>
+                            </t>
+                        </svg>
+                    </div>
+                    <div class="o_pa_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title">Weekly Occupancy</span>
+                            <span class="o_pa_card_sub">Utilization by day of week</span>
+                        </div>
+                        <t t-set="bars" t-value="buildBarChart(state.data.weekly_occupancy.labels, state.data.weekly_occupancy.values, {width:560,height:160,padding:32})"/>
+                        <svg t-att-viewBox="'0 0 ' + bars.width + ' ' + bars.height" class="o_pa_chart" preserveAspectRatio="none">
+                            <t t-foreach="bars.gridLines" t-as="gl" t-key="gl_index">
+                                <line t-att-x1="bars.padding" t-att-x2="bars.width - bars.padding" t-att-y1="gl.y" t-att-y2="gl.y" stroke="#F1F5F9" stroke-dasharray="4 3"/>
+                                <text t-att-x="bars.padding - 6" t-att-y="gl.y + 4" class="o_pa_axis_text" text-anchor="end" t-esc="Math.round(gl.v) + '%'"/>
+                            </t>
+                            <t t-foreach="bars.bars" t-as="b" t-key="b_index">
+                                <rect t-att-x="b.x" t-att-y="b.y" t-att-width="b.w" t-att-height="b.h" rx="4" t-att-fill="b.color"/>
+                                <text t-att-x="b.x + b.w/2" t-att-y="bars.height - 6" class="o_pa_axis_text" text-anchor="middle" t-esc="b.label"/>
+                            </t>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- ── Row: Heatmap + Section donut ── -->
+                <div class="o_pa_row_heatmap">
+                    <div class="o_pa_card o_pa_heatmap_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title">Peak Demand Heatmap</span>
+                            <span class="o_pa_card_sub">Bookings by hour × weekday — last <t t-esc="state.rangeDays"/> days</span>
+                        </div>
+                        <div t-if="state.heatmap and state.heatmap.max" class="o_ps_heatmap">
+                            <t t-foreach="heatmapRows" t-as="row" t-key="row_index">
+                                <div class="o_ps_heatmap_label" t-esc="row.label"/>
+                                <t t-foreach="row.cells" t-as="c" t-key="c_index">
+                                    <div class="o_ps_heatmap_cell" t-att-style="'background:' + c.bg" t-att-title="c.title"/>
+                                </t>
+                            </t>
+                            <div class="o_ps_heatmap_axis">
+                                <t t-foreach="heatmapAxis" t-as="tick" t-key="tick_index">
+                                    <span t-esc="tick"/>
+                                </t>
+                            </div>
+                        </div>
+                        <div t-else="" class="o_pa_empty_tile">
+                            <i class="fa fa-th-large"/>
+                            <span>Not enough data to build the heatmap yet.</span>
+                        </div>
+                    </div>
+                    <div class="o_pa_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title">Usage by Location</span>
+                            <span class="o_pa_card_sub">Booking share per section</span>
+                        </div>
+                        <div class="o_pa_donut_block">
+                            <t t-set="donut" t-value="buildDonut(state.data.usage_by_section, {size: 140, stroke: 22})"/>
+                            <svg t-att-width="donut.size" t-att-height="donut.size" class="o_pa_donut_svg">
+                                <g t-att-transform="'rotate(-90 ' + donut.size/2 + ' ' + donut.size/2 + ')'">
+                                    <circle t-att-cx="donut.size/2" t-att-cy="donut.size/2" t-att-r="donut.radius" fill="none" stroke="#F1F5F9" t-att-stroke-width="donut.stroke"/>
+                                    <t t-foreach="donut.arcs" t-as="arc" t-key="arc_index">
+                                        <circle t-att-cx="donut.size/2" t-att-cy="donut.size/2" t-att-r="donut.radius"
+                                                fill="none" t-att-stroke="arc.color" t-att-stroke-width="donut.stroke"
+                                                t-att-stroke-dasharray="arc.length + ' ' + arc.gap"
+                                                t-att-stroke-dashoffset="arc.offset"
+                                                stroke-linecap="round"/>
+                                    </t>
+                                </g>
+                            </svg>
+                            <div class="o_pa_legend">
+                                <t t-foreach="state.data.usage_by_section" t-as="sec" t-key="sec_index">
+                                    <div class="o_pa_legend_row">
+                                        <span class="o_pa_legend_dot" t-att-style="'background:' + sec.color"/>
+                                        <span class="o_pa_legend_name" t-esc="sec.name"/>
+                                        <span class="o_pa_legend_pct"><t t-esc="sec.percent"/>%</span>
+                                    </div>
+                                </t>
+                                <t t-if="!state.data.usage_by_section.length">
+                                    <span class="o_pa_empty_label">No data for this range.</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Row: Forecast + Top Users ── -->
+                <div class="o_pa_row_2">
+                    <div class="o_pa_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title"><i class="fa fa-line-chart me-1" style="color:#2563EB"/> 7-Day Forecast</span>
+                            <span class="o_pa_card_sub">Predicted demand from same-weekday history</span>
+                        </div>
+                        <t t-if="forecastBars.length">
+                            <div class="o_pa_forecast_bars">
+                                <t t-foreach="forecastBars" t-as="bar" t-key="bar.date">
+                                    <div class="o_pa_forecast_col">
+                                        <div class="o_pa_forecast_pct" t-esc="bar.pct + '%'"/>
+                                        <div class="o_pa_forecast_track">
+                                            <div class="o_pa_forecast_fill" t-att-style="'height:' + bar.pct + '%;background:' + bar.color"/>
+                                        </div>
+                                        <div class="o_pa_forecast_label" t-esc="bar.label"/>
+                                        <div class="o_pa_forecast_count" t-esc="bar.predicted + ' bkg'"/>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="o_pa_forecast_legend">
+                                <span class="o_pa_fc_dot" style="background:#3B82F6"/> Normal
+                                <span class="o_pa_fc_dot" style="background:#F59E0B"/> Busy ≥60%
+                                <span class="o_pa_fc_dot" style="background:#EF4444"/> High ≥80%
+                            </div>
+                        </t>
+                        <div t-else="" class="o_pa_empty_tile">
+                            <i class="fa fa-bar-chart"/>
+                            <span>Not enough history to forecast yet.</span>
+                        </div>
+                    </div>
+                    <div class="o_pa_card">
+                        <div class="o_pa_card_head">
+                            <span class="o_pa_card_title">Top Parking Users</span>
+                            <span class="o_pa_card_sub">By booking count this period</span>
+                        </div>
+                        <table class="o_pa_top_table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Dept</th>
+                                    <th class="text-end">Bkgs</th>
+                                    <th class="text-end">Avg h</th>
+                                    <th style="min-width:100px">Utilization</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.data.top_users" t-as="u" t-key="u.id">
+                                    <tr>
+                                        <td>
+                                            <div class="o_pa_user">
+                                                <span class="o_pa_avatar" t-att-style="'background:' + u.color" t-esc="u.initials"/>
+                                                <span class="o_pa_user_name" t-esc="u.name"/>
+                                            </div>
+                                        </td>
+                                        <td><span class="o_pa_dept_chip" t-esc="u.department"/></td>
+                                        <td class="text-end fw-bold" t-esc="u.count"/>
+                                        <td class="text-end" t-esc="u.avg_duration + 'h'"/>
+                                        <td>
+                                            <div class="o_pa_util">
+                                                <div class="o_pa_util_bar">
+                                                    <div class="o_pa_util_fill" t-att-style="'width:' + u.utilization_pct + '%'"/>
+                                                </div>
+                                                <span class="o_pa_util_val"><t t-esc="u.utilization_pct"/>%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="!state.data.top_users.length">
+                                    <tr><td colspan="5" class="o_pa_empty_label text-center py-3">No bookings in this period yet.</td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ── No-Show strip ── -->
+                <div class="o_pa_card o_pa_ns_strip">
+                    <div class="o_pa_ns_badge">
+                        <div class="o_pa_ns_value"><t t-esc="state.data.no_show.rate_pct"/><span>%</span></div>
+                        <div class="o_pa_ns_meta">No-Show Rate</div>
+                        <div class="o_pa_ns_sub"><t t-esc="state.data.no_show.count"/> of <t t-esc="state.data.no_show.total_terminal"/> bookings</div>
+                    </div>
+                    <div class="o_pa_ns_table_wrap">
+                        <table class="o_pa_top_table">
+                            <thead>
+                                <tr>
+                                    <th>Repeat Offenders</th>
+                                    <th>Dept</th>
+                                    <th class="text-end">No-Shows</th>
+                                    <th class="text-end">Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.data.no_show_offenders" t-as="u" t-key="u_index">
+                                    <tr>
+                                        <td>
+                                            <div class="o_pa_user">
+                                                <span class="o_pa_avatar" t-att-style="'background:' + u.color" t-esc="u.initials"/>
+                                                <span class="o_pa_user_name" t-esc="u.name"/>
+                                            </div>
+                                        </td>
+                                        <td><span class="o_pa_dept_chip" t-esc="u.department"/></td>
+                                        <td class="text-end fw-bold" t-esc="u.no_show_count"/>
+                                        <td class="text-end"><t t-esc="u.rate"/>%</td>
+                                    </tr>
+                                </t>
+                                <t t-if="!state.data.no_show_offenders.length">
+                                    <tr><td colspan="4" class="o_pa_empty_label text-center py-3">Everyone showed up — no no-shows.</td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </t>
+        </div>
+    </t>
+
+</templates>

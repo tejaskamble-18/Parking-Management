@@ -1,0 +1,54 @@
+.o_ss_card {
+    border-top: 3px solid #F59E0B;
+}
+
+.o_ss_suggestion {
+    font-size: 0.82rem;
+    color: var(--o-ps-text-secondary, #64748B);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.o_ss_tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.o_ss_tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &.o_ss_tag_day  { background: #DBEAFE; color: #1D4ED8; }
+    &.o_ss_tag_time { background: #D1FAE5; color: #065F46; }
+    &.o_ss_tag_zone { background: #EDE9FE; color: #5B21B6; }
+}
+
+.o_ss_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+
+    &.o_ss_badge_warn { background: #FEF3C7; color: #92400E; }
+    &.o_ss_badge_info { background: #DBEAFE; color: #1E40AF; }
+}
+
+.o_ss_book_btn {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.o_ss_nudge .o_ss_suggestion {
+    font-style: italic;
+}

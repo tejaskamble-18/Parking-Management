@@ -1,0 +1,25 @@
+{
+  "name": "Parking Management",
+  "short_name": "Parking",
+  "description": "Book parking slots, check in, and manage waitlists.",
+  "start_url": "/odoo/action-room.action_parking_dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1565C0",
+  "icons": [
+    {
+      "src": "/room/static/description/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/room/static/description/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

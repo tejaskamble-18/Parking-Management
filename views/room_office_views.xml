@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view ─────────────────────────────────────────────────────── -->
+    <record id="room_office_view_list" model="ir.ui.view">
+        <field name="name">room.office.view.list</field>
+        <field name="model">room.office</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="image_128" widget="image"
+                       options="{'size': [72, 54], 'preview_image': 'image_1920', 'zoom': true}"
+                       string="Map"/>
+                <field name="complete_name" string="Location Name"/>
+                <field name="location_type" widget="badge"
+                       decoration-info="location_type == 'head_office'"
+                       decoration-success="location_type == 'branch'"
+                       decoration-warning="location_type == 'zone'"
+                       decoration-muted="location_type in ('floor','building')"/>
+                <field name="parent_id" string="Parent" optional="show"/>
+                <field name="responsible_id" widget="many2one_avatar_user" string="Responsible"/>
+                <field name="total_slot_count" string="Slots"/>
+                <field name="active_booking_count" string="Active Now"/>
+                <field name="occupancy_rate" string="Occupancy %" widget="percentage"/>
+                <field name="child_count" string="Sub-Locations" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ─────────────────────────────────────────────────────── -->
+    <record id="room_office_view_form" model="ir.ui.view">
+        <field name="name">room.office.view.form</field>
+        <field name="model">room.office</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_map"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-map-o"
+                                invisible="not image_1920">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">View</span>
+                                <span class="o_stat_value">Map</span>
+                            </div>
+                        </button>
+                        <button name="action_view_slots"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-car">
+                            <field name="total_slot_count" widget="statinfo" string="Slots"/>
+                        </button>
+                        <button name="action_view_bookings"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-calendar-check-o">
+                            <field name="active_booking_count" widget="statinfo" string="Active Now"/>
+                        </button>
+                        <button name="action_view_children"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-sitemap"
+                                invisible="child_count == 0">
+                            <field name="child_count" widget="statinfo" string="Sub-Locations"/>
+                        </button>
+                    </div>
+
+                    <field name="image_1920" widget="image"
+                           class="oe_avatar"
+                           options="{'preview_image': 'image_128', 'size': [90, 90]}"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Mumbai Branch"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Location Details">
+                            <field name="location_type"/>
+                            <field name="parent_id" placeholder="Leave empty for top-level"/>
+                            <field name="complete_name" readonly="1"/>
+                            <field name="company_id"
+                                   domain="[('id', 'in', allowed_company_ids)]"
+                                   options="{'no_create': True}"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Management">
+                            <field name="responsible_id" widget="many2one_avatar_user"/>
+                            <field name="occupancy_rate" widget="percentage" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Parking Slots" name="slots">
+                            <field name="room_ids">
+                                <list>
+                                    <field name="name" string="Slot"/>
+                                    <field name="slot_type" string="Type"/>
+                                    <field name="active" string="Active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sub-Locations" name="children" invisible="child_count == 0">
+                            <field name="child_ids">
+                                <list>
+                                    <field name="name" string="Name"/>
+                                    <field name="location_type" widget="badge"/>
+                                    <field name="responsible_id" widget="many2one_avatar_user"/>
+                                    <field name="total_slot_count" string="Slots"/>
+                                    <field name="active_booking_count" string="Active Now"/>
+                                    <field name="occupancy_rate" string="Occ. %" widget="percentage"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Window action ─────────────────────────────────────────────────── -->
+    <record id="action_parking_office_list" model="ir.actions.act_window">
+        <field name="name">Parking Locations</field>
+        <field name="res_model">room.office</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first Parking Location</p>
+            <p>Define locations and nest them under a parent to build a hierarchy.</p>
+        </field>
+    </record>
+
+</odoo>

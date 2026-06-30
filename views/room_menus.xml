@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Client action records ───────────────────────────────────────── -->
+    <record id="action_parking_dashboard" model="ir.actions.client">
+        <field name="name">Parking Dashboard</field>
+        <field name="tag">room.parking_dashboard</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_parking_analytics" model="ir.actions.client">
+        <field name="name">Analytics</field>
+        <field name="tag">room.parking_analytics</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_my_bookings" model="ir.actions.client">
+        <field name="name">My Bookings</field>
+        <field name="tag">room.my_bookings</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_parking_calendar" model="ir.actions.client">
+        <field name="name">My Calendar</field>
+        <field name="tag">room.parking_calendar</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_admin_panel" model="ir.actions.client">
+        <field name="name">Admin Panel</field>
+        <field name="tag">room.admin_panel</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- ── Pending Approvals window action ─────────────────────────────── -->
+    <record id="action_pending_approvals" model="ir.actions.act_window">
+        <field name="name">Pending Approvals</field>
+        <field name="res_model">room.booking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'pending_approval')]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('room.room_booking_view_pending_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('room.room_booking_view_form')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No pending approvals</p>
+            <p>Bookings on premium slots requested by non-leadership users appear here for review.</p>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         ROOT
+    ══════════════════════════════════════════════════════════════════ -->
+    <menuitem
+        id="room_menu_root"
+        name="Parking Management"
+        web_icon="room,static/description/icon.png"
+        action="room.action_parking_dashboard"
+        sequence="6"/>
+
+    <!-- ── 1. Dashboard (direct) ───────────────────────────────────────── -->
+    <menuitem
+        id="room_dashboard_menu"
+        name="Dashboard"
+        action="room.action_parking_dashboard"
+        parent="room.room_menu_root"
+        sequence="10"/>
+
+    <!-- ── 2. My Space ────────────────────────────────────────────────── -->
+    <menuitem
+        id="room_my_space_menu"
+        name="My Space"
+        parent="room.room_menu_root"
+        sequence="20"/>
+
+    <menuitem
+        id="room_my_bookings_menu"
+        name="My Bookings"
+        action="room.action_my_bookings"
+        parent="room.room_my_space_menu"
+        sequence="1"/>
+
+    <menuitem
+        id="room_calendar_menu"
+        name="My Calendar"
+        action="room.action_parking_calendar"
+        parent="room.room_my_space_menu"
+        sequence="2"/>
+
+    <!-- ── 3. Bookings (managers + leadership) ────────────────────────── -->
+    <menuitem
+        id="room_bookings_menu"
+        name="Bookings"
+        parent="room.room_menu_root"
+        sequence="30"
+        groups="room.group_parking_manager,room.group_parking_leadership,base.group_system"/>
+
+    <menuitem
+        id="room_booking_menu"
+        name="All Bookings"
+        action="room.room_booking_action"
+        parent="room.room_bookings_menu"
+        sequence="1"/>
+
+    <menuitem
+        id="room_pending_approvals_menu"
+        name="Pending Approvals"
+        action="room.action_pending_approvals"
+        parent="room.room_bookings_menu"
+        sequence="2"
+        groups="room.group_parking_manager,room.group_parking_leadership,base.group_system"/>
+
+    <menuitem
+        id="room_waitlist_menu"
+        name="Waitlist"
+        action="room.action_room_booking_waitlist"
+        parent="room.room_bookings_menu"
+        sequence="3"
+        groups="room.group_parking_manager,base.group_system"/>
+
+    <!-- ── 4. Parking (slots + locations) ────────────────────────────── -->
+    <menuitem
+        id="room_parking_menu"
+        name="Parking"
+        parent="room.room_menu_root"
+        sequence="40"/>
+
+    <menuitem
+        id="room_room_menu"
+        name="Slots"
+        action="room.room_room_action"
+        parent="room.room_parking_menu"
+        sequence="1"/>
+
+    <menuitem
+        id="room_locations_menu"
+        name="Locations"
+        action="room.action_parking_office_list"
+        parent="room.room_parking_menu"
+        sequence="2"/>
+
+    <!-- ── 5. Analytics (managers + admins only — employees don't see it) ── -->
+    <menuitem
+        id="room_analytics_menu"
+        name="Analytics"
+        action="room.action_parking_analytics"
+        parent="room.room_menu_root"
+        sequence="50"
+        groups="room.group_parking_manager,base.group_system"/>
+
+    <!-- ── 6. Admin (system admins only) ─────────────────────────────── -->
+    <menuitem
+        id="room_admin_menu"
+        name="Admin"
+        parent="room.room_menu_root"
+        sequence="60"
+        groups="room.group_parking_manager,base.group_system"/>
+
+    <menuitem
+        id="room_admin_panel_menu"
+        name="Admin Panel"
+        action="room.action_admin_panel"
+        parent="room.room_admin_menu"
+        sequence="1"
+        groups="base.group_system"/>
+
+    <menuitem
+        id="room_settings_menu"
+        name="Settings"
+        action="room.action_parking_config_settings"
+        parent="room.room_admin_menu"
+        sequence="2"
+        groups="room.group_parking_manager,base.group_system"/>
+
+</odoo>

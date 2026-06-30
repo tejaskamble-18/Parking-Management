@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view: all employees with parking profile ─────────────────── -->
+    <record id="hr_employee_parking_view_list" model="ir.ui.view">
+        <field name="name">hr.employee.parking.list</field>
+        <field name="model">hr.employee</field>
+        <field name="arch" type="xml">
+            <list string="Employee Parking"
+                  default_order="name">
+                <field name="image_128" widget="image" optional="hide" string=" "/>
+                <field name="name" string="Employee"/>
+                <field name="department_id" optional="show"/>
+                <field name="job_id" optional="show"/>
+
+                <field name="parking_priority_score" string="Priority Score"
+                       groups="room.group_parking_manager"/>
+                <field name="parking_no_show_count" string="No-Shows"
+                       groups="room.group_parking_manager"/>
+                <field name="parking_temp_ban_until" string="Banned Until"
+                       optional="show"
+                       groups="room.group_parking_manager"/>
+                <field name="parking_last_booking_at" string="Last Booking"
+                       optional="show"
+                       groups="room.group_parking_manager"/>
+                <field name="user_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view: parking tab injected into hr.employee form ─────────── -->
+    <record id="hr_employee_parking_view_form_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.parking.form.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Parking" name="parking_tab" groups="room.group_parking_manager,hr.group_hr_user">
+                    <group string="Parking Score &amp; Status" groups="room.group_parking_manager">
+                        <field name="parking_priority_score"/>
+                        <field name="parking_no_show_count"/>
+                        <field name="parking_temp_ban_until"/>
+                        <field name="parking_last_booking_at"/>
+                    </group>
+                    <group string="Location Access" groups="room.group_parking_manager">
+                        <field name="parking_visible_office_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True, 'no_create_edit': True}"
+                               placeholder="Leave empty to allow access to all locations..."/>
+                        <label for="parking_visible_office_ids" string=" " class="text-muted"/>
+                        <div class="text-muted fst-italic">
+                            If empty, the employee sees all parking locations on the Dashboard
+                            and can book at any of them. If one or more locations are picked,
+                            the employee is restricted to those only.
+                        </div>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <!-- ── Window action ─────────────────────────────────────────────────── -->
+    <record id="action_hr_employee_parking" model="ir.actions.act_window">
+        <field name="name">Employee Parking</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('room.hr_employee_parking_view_list')}),
+        ]"/>
+        <field name="domain">[]</field>
+        <field name="context">{'default_active': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No employees found</p>
+        </field>
+    </record>
+
+    <!-- ── Menu item under Employees app ─────────────────────────────────── -->
+    <menuitem
+        id="room_hr_employee_parking_menu"
+        name="Employee Parking"
+        parent="hr.menu_hr_root"
+        action="room.action_hr_employee_parking"
+        sequence="50"
+        groups="room.group_parking_manager,base.group_system"/>
+
+</odoo>

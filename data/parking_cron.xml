@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Runs every 15 minutes. Confirmed bookings whose start is more
+             than 15 min in the past and which were never checked in flip to
+             'no_show' so the slot becomes bookable again. -->
+        <record id="parking_cron_flag_no_shows" model="ir.cron">
+            <field name="name">Parking: Flag No-Show Bookings</field>
+            <field name="model_id" ref="model_room_booking"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_flag_no_shows()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Runs every 5 minutes. Drains any bookings whose last_sync_status
+             is 'pending' through the Microsoft Graph sync service. Batches of
+             50 per pass so a large backlog drains predictably. -->
+        <record id="parking_cron_sync_outlook" model="ir.cron">
+            <field name="name">Parking: Sync Bookings to Outlook</field>
+            <field name="model_id" ref="model_room_booking"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_sync_outlook()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+        <!-- Runs every 15 minutes. Finds confirmed bookings whose start is
+             25-40 min away and fires the 30-min reminder notification once
+             per booking (reminder_sent gate prevents double-fire). -->
+        <record id="parking_cron_send_reminders" model="ir.cron">
+            <field name="name">Parking: Send 30-Minute Reminders</field>
+            <field name="model_id" ref="model_room_booking"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_reminders()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Runs every 15 minutes. Pulls delta changes from Outlook and cancels
+             parking bookings whose Outlook event was deleted or cancelled.
+             Only active when parking_outlook_pull_enabled = True in Settings. -->
+        <record id="parking_cron_pull_outlook" model="ir.cron">
+            <field name="name">Parking: Pull Cancellations from Outlook</field>
+            <field name="model_id" ref="model_room_booking"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_pull_outlook_cancellations()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

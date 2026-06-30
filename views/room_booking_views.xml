@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="room_booking_view_search" model="ir.ui.view">
+        <field name="name">Bookings search view</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <search string="Parking Booking">
+                <field name="name" string="Booking title"/>
+                <field name="vehicle_number"/>
+                <field name="employee_id"/>
+                <field name="organizer_id"/>
+                <field name="room_id" string="Parking Slot"/>
+                <field name="office_id"/>
+                <filter name="organizer_id" string="My Bookings" domain="[('organizer_id', '=', uid)]"/>
+                <filter name="filter_recurring" string="Recurring" domain="[('is_recurring', '=', True)]"/>
+                <filter name="filter_upcoming" string="Upcoming" domain="[('start_datetime', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="group_by_organizer_id" string="Organizer" context="{'group_by': 'organizer_id'}"/>
+                <filter name="group_by_employee_id" string="Employee" context="{'group_by': 'employee_id'}"/>
+                <filter name="group_by_room_id" string="Parking Slot" context="{'group_by': 'room_id'}"/>
+                <filter name="group_by_office_id" context="{'group_by': 'office_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="room_booking_view_gantt" model="ir.ui.view">
+        <field name="name">room.booking.view.gantt</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <gantt js_class="room_booking_gantt"
+                date_start="start_datetime"
+                date_stop="stop_datetime"
+                default_group_by="room_id"
+                precision="{'day': 'hour:quarter', 'week': 'day:half', 'month': 'day:half', 'year': 'day:full'}"
+                default_scale="day"
+                color="organizer_id"
+                string="Bookings"
+                plan="0">
+                <templates>
+                    <div t-name="gantt-popover">
+                        <div class="o_gantt_popover">
+                            <ul class="ps-1 mb-0 list-unstyled">
+                                <li>
+                                    <strong>Organizer: </strong>
+                                    <t t-out="organizer_id.display_name"/>
+                                </li>
+                                <li class="o_gantt_popover_content_item mt-2">
+                                    <t t-out="start_datetime.toFormat('f ')"/>
+                                    <i class="fa fa-long-arrow-right" title="Until"/>
+                                    <t t-out="stop_datetime.toFormat(' f')"/>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </templates>
+            </gantt>
+        </field>
+    </record>
+
+    <record id="room_booking_view_calendar" model="ir.ui.view">
+        <field name="name">room.booking.view.calendar</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <calendar date_start="start_datetime" date_stop="stop_datetime" color="room_id" quick_create="0" event_open_popup="1">
+                <field name="room_id" filters="1"/>
+                <field name="vehicle_number"/>
+                <field name="employee_id" filters="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="room_booking_view_list" model="ir.ui.view">
+        <field name="name">room.booking.view.list</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <list duplicate="0" sample="1">
+                <field name="start_datetime"/>
+                <field name="stop_datetime"/>
+                <field name="name" string="Title"/>
+                <field name="room_id" string="Parking Slot"/>
+                <field name="vehicle_number"/>
+                <field name="employee_id"/>
+                <field name="is_recurring" optional="hide"/>
+                <field name="organizer_id" widget="many2one_avatar_user" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Pending Approvals list: inline approve/reject, visible to leadership/managers -->
+    <record id="room_booking_view_pending_list" model="ir.ui.view">
+        <field name="name">room.booking.view.pending.list</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <list duplicate="0" decoration-warning="state == 'pending_approval'"
+                  string="Pending Approvals">
+                <field name="create_date" string="Requested On"/>
+                <field name="organizer_id" widget="many2one_avatar_user" string="Requested By"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="room_id" string="Parking Slot"/>
+                <field name="start_datetime" string="From"/>
+                <field name="stop_datetime" string="To"/>
+                <field name="vehicle_number"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'pending_approval'"
+                       decoration-success="state == 'confirmed'"
+                       decoration-danger="state == 'cancelled'"/>
+                <button name="action_approve" string="Approve" type="object"
+                        icon="fa-check" class="btn-success"
+                        groups="room.group_parking_leadership,base.group_system"
+                        invisible="state != 'pending_approval'"/>
+                <button name="action_reject" string="Reject" type="object"
+                        icon="fa-times" class="btn-danger"
+                        groups="room.group_parking_leadership,base.group_system"
+                        invisible="state != 'pending_approval'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="room_booking_view_kanban" model="ir.ui.view">
+        <field name="name">room.booking.view.kanban</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <templates>
+                    <t t-name="card">
+                        <field name="display_name" class="fw-bolder fs-5"/>
+                        <div class="ps-1 mb-0">
+                            <strong>Parking Slot: </strong>
+                            <field name="room_id"/>
+                        </div>
+                        <div class="ps-1 mb-0" invisible="not vehicle_number">
+                            <strong>Vehicle: </strong>
+                            <field name="vehicle_number"/>
+                        </div>
+                        <div class="ps-1 mb-0" invisible="not employee_id">
+                            <strong>Employee: </strong>
+                            <field name="employee_id"/>
+                        </div>
+                        <div class="ps-1">
+                            <strong>Date: </strong>
+                            <field name="start_datetime"/>
+                            <i class="fa fa-long-arrow-right mx-1" title="Until"/>
+                            <field name="stop_datetime"/>
+                        </div>
+                        <footer class="pt-0">
+                            <field name="organizer_id" widget="many2one_avatar_user" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="room_booking_view_form" model="ir.ui.view">
+        <field name="name">room.booking.view.form</field>
+        <field name="model">room.booking</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <header>
+                    <button name="action_approve" type="object"
+                            string="Approve"
+                            class="btn-success"
+                            icon="fa-check"
+                            invisible="state != 'pending_approval'"
+                            groups="room.group_parking_leadership"/>
+                    <button name="action_reject" type="object"
+                            string="Reject"
+                            class="btn-danger"
+                            icon="fa-times"
+                            invisible="state != 'pending_approval'"
+                            groups="room.group_parking_leadership"
+                            confirm="Reject this Premium-slot booking request? The requester will be notified via chatter."/>
+                    <button name="action_check_in" type="object"
+                            string="Check In"
+                            class="btn-primary"
+                            icon="fa-sign-in"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_check_out" type="object"
+                            string="Check Out"
+                            class="btn-primary"
+                            icon="fa-sign-out"
+                            invisible="state not in ('confirmed', 'checked_in')"/>
+                    <button name="action_mark_confirmed" type="object"
+                            string="Re-open Booking"
+                            class="btn-secondary"
+                            invisible="state not in ('cancelled', 'no_show')"
+                            groups="room.group_parking_manager"/>
+                    <button name="action_delete_recurrence_series" type="object"
+                            string="Delete Entire Series"
+                            class="btn-danger"
+                            icon="fa-trash"
+                            invisible="not is_recurring and not parent_booking_id"
+                            confirm="Delete this booking AND all of its recurring occurrences? This cannot be undone."/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel Booking"
+                            class="btn-secondary"
+                            invisible="state in ('cancelled', 'completed', 'no_show')"/>
+                    <button name="action_resync_outlook" type="object"
+                            string="Re-sync Outlook"
+                            class="btn-secondary"
+                            icon="fa-refresh"
+                            invisible="last_sync_status in ('disabled',)"
+                            groups="room.group_parking_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending_approval,confirmed,checked_in,completed"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="bg-danger" invisible="active"/>
+                    <div class="oe_title mb-3">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Daily Commute"/>
+                        </h1>
+                        <field name="active" invisible="1"/>
+                        <field name="employee_id" invisible="1"/>
+                        <field name="available_slot_ids" invisible="1"/>
+                        <field name="available_slot_count" invisible="1"/>
+                    </div>
+
+                    <!-- Step 1 — tell us when and what car -->
+                    <group string="1. When do you need it?">
+                        <group>
+                            <field name="start_datetime"/>
+                            <field name="stop_datetime"/>
+                        </group>
+                        <group>
+                            <field name="vehicle_number" placeholder="e.g. KA-01-AB-1234"/>
+                            <field name="organizer_id" widget="many2one_avatar_user"/>
+                        </group>
+                    </group>
+
+                    <!-- Hint banner before a time window is picked -->
+                    <div class="alert alert-info d-flex align-items-center gap-2 mb-3"
+                         role="alert"
+                         invisible="start_datetime and stop_datetime">
+                        <i class="fa fa-info-circle"/>
+                        <span>Pick a start and end time above — we'll show you only the slots actually available for that window.</span>
+                    </div>
+
+                    <!-- Availability count banner once times are set -->
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-3"
+                         role="alert"
+                         invisible="not start_datetime or not stop_datetime or available_slot_count == 0">
+                        <i class="fa fa-check-circle"/>
+                        <span>
+                            <b><field name="available_slot_count" readonly="1" nolabel="1" class="d-inline"/></b>
+                            slots are free during your selected window. Pick one below.
+                        </span>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3"
+                         role="alert"
+                         invisible="not start_datetime or not stop_datetime or available_slot_count != 0">
+                        <i class="fa fa-exclamation-triangle"/>
+                        <span>No slots are free in that window. Try a different time, or join a waitlist from the Dashboard.</span>
+                    </div>
+
+                    <!-- Step 2 — pick the slot (only shows once times are set) -->
+                    <group string="2. Choose your parking slot"
+                           invisible="not start_datetime or not stop_datetime">
+                        <group>
+                            <field name="preferred_office_id"
+                                   string="Filter by Location"
+                                   placeholder="All locations (optional)..."
+                                   options="{'no_create': True}"/>
+                            <field name="room_id"
+                                   placeholder="Select an available slot..."
+                                   domain="[('id', 'in', available_slot_ids)]"
+                                   options="{'no_create_edit': True}"/>
+                            <field name="location"
+                                   string="Parking Location"
+                                   readonly="1"
+                                   invisible="not room_id"/>
+                        </group>
+                        <group>
+                            <field name="parent_booking_id" readonly="1" invisible="not parent_booking_id"/>
+                        </group>
+                    </group>
+                    <group string="Visitor Booking">
+                        <field name="is_guest_booking"/>
+                        <field name="guest_name"
+                               invisible="not is_guest_booking"
+                               required="is_guest_booking"/>
+                        <field name="guest_company"
+                               invisible="not is_guest_booking"/>
+                        <field name="guest_vehicle_number"
+                               invisible="not is_guest_booking"
+                               required="is_guest_booking"/>
+                        <label for="is_guest_booking"
+                               string="A 'visitor booking' means you (the host) are reserving this slot on behalf of an external guest. The guest's vehicle number will be used at the gate instead of your own."
+                               class="text-muted fst-italic"
+                               invisible="not is_guest_booking"/>
+                    </group>
+                    <group string="Recurrence">
+                        <field name="is_recurring"/>
+                        <field name="recurrence_type"
+                               invisible="not is_recurring"
+                               required="is_recurring"
+                               widget="radio"
+                               options="{'horizontal': True}"/>
+                        <field name="recurrence_end_date"
+                               invisible="not is_recurring"
+                               required="is_recurring and not recurrence_count"/>
+                        <field name="recurrence_count"
+                               invisible="not is_recurring"
+                               groups="base.group_no_one"/>
+                        <label for="is_recurring"
+                               string="Tip: pick a frequency and an 'Ends on' date. The system will create one booking per occurrence, up to 200 in total."
+                               class="text-muted fst-italic"
+                               invisible="not is_recurring"/>
+                    </group>
+                    <notebook invisible="not recurrence_child_ids">
+                        <page string="Generated Occurrences">
+                            <field name="recurrence_child_ids" readonly="1">
+                                <list>
+                                    <field name="start_datetime"/>
+                                    <field name="stop_datetime"/>
+                                    <field name="room_id" string="Parking Slot"/>
+                                    <field name="vehicle_number"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Outlook Sync" groups="room.group_parking_manager" name="sync_status">
+                            <group>
+                                <field name="last_sync_status" readonly="1"/>
+                                <field name="last_sync_at" readonly="1"/>
+                                <field name="outlook_event_id" readonly="1"/>
+                                <field name="last_sync_error" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="room_booking_action" model="ir.actions.act_window">
+        <field name="name">Parking Bookings</field>
+        <field name="path">rooms</field>
+        <field name="res_model">room.booking</field>
+        <field name="view_mode">gantt,calendar,list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Parking Bookings found. Let's reserve a slot!
+            </p><p>
+                Book parking slots for employees and vehicles, with optional recurring reservations.
+            </p>
+        </field>
+    </record>
+
+    <!-- Explicit view ordering so Gantt is the guaranteed default regardless
+         of any cached per-user view preference. -->
+    <record id="room_booking_action_view_gantt" model="ir.actions.act_window.view">
+        <field name="sequence">10</field>
+        <field name="view_mode">gantt</field>
+        <field name="view_id" ref="room_booking_view_gantt"/>
+        <field name="act_window_id" ref="room_booking_action"/>
+    </record>
+    <record id="room_booking_action_view_calendar" model="ir.actions.act_window.view">
+        <field name="sequence">20</field>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="room_booking_view_calendar"/>
+        <field name="act_window_id" ref="room_booking_action"/>
+    </record>
+    <record id="room_booking_action_view_list" model="ir.actions.act_window.view">
+        <field name="sequence">30</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="room_booking_view_list"/>
+        <field name="act_window_id" ref="room_booking_action"/>
+    </record>
+    <record id="room_booking_action_view_kanban" model="ir.actions.act_window.view">
+        <field name="sequence">40</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="room_booking_view_kanban"/>
+        <field name="act_window_id" ref="room_booking_action"/>
+    </record>
+    <record id="room_booking_action_view_form" model="ir.actions.act_window.view">
+        <field name="sequence">50</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="room_booking_view_form"/>
+        <field name="act_window_id" ref="room_booking_action"/>
+    </record>
+</odoo>

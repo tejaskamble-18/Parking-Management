@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add a "Parking Calendar Feed" section to the user preferences/form
+         so each user can grab their personal ics URL to paste into Outlook. -->
+
+    <record id="view_users_form_parking_ics" model="ir.ui.view">
+        <field name="name">res.users.form.parking.ics</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Parking Calendar"
+                      name="parking_calendar"
+                      groups="base.group_user">
+                    <group string="Outlook / Google Calendar Sync">
+                        <p colspan="2" class="text-muted">
+                            Paste this URL into Outlook → <b>Add Calendar → From Internet</b>,
+                            or Google Calendar → <b>Other calendars → From URL</b> to see your
+                            parking bookings inside your personal calendar.
+                            The URL is private — regenerate it to revoke existing subscribers.
+                        </p>
+                        <field name="parking_ics_url" widget="CopyClipboardChar" readonly="1"/>
+                        <button name="action_parking_regenerate_ics_token"
+                                type="object"
+                                string="Regenerate URL"
+                                class="btn-secondary"
+                                confirm="Regenerating the URL will stop any existing Outlook/Google subscription from updating. Continue?"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

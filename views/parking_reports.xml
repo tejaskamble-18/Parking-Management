@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ─── Booking History Report ─── -->
+    <record id="action_report_booking_history" model="ir.actions.report">
+        <field name="name">Booking History</field>
+        <field name="model">room.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">room.report_booking_history</field>
+        <field name="report_file">room.report_booking_history</field>
+    </record>
+
+    <template id="report_booking_history">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Parking Booking History</h2>
+                    <p class="text-muted">
+                        Total records: <t t-esc="len(docs)"/>
+                    </p>
+                    <table class="table table-sm table-bordered o_main_table mt16">
+                        <thead>
+                            <tr style="background:#f8f9fa;">
+                                <th>#</th>
+                                <th>Booking</th>
+                                <th>Slot</th>
+                                <th>Location</th>
+                                <th>Employee / Organizer</th>
+                                <th>Vehicle</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="b">
+                                <tr>
+                                    <td><t t-esc="b_index + 1"/></td>
+                                    <td><t t-esc="b.name"/></td>
+                                    <td><t t-esc="b.room_id.name"/></td>
+                                    <td><t t-esc="b.room_id.office_id.name"/></td>
+                                    <td><t t-esc="b.employee_id.name or b.organizer_id.name or ''"/></td>
+                                    <td><t t-esc="b.vehicle_number or '—'"/></td>
+                                    <td><t t-esc="b.start_datetime.strftime('%d %b %Y %H:%M') if b.start_datetime else ''"/></td>
+                                    <td><t t-esc="b.stop_datetime.strftime('%d %b %Y %H:%M') if b.stop_datetime else ''"/></td>
+                                    <td><t t-esc="dict(b._fields['state'].selection).get(b.state, b.state)"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ─── Parking Utilization Report ─── -->
+    <record id="action_report_utilization" model="ir.actions.report">
+        <field name="name">Parking Utilization Summary</field>
+        <field name="model">room.office</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">room.report_utilization</field>
+        <field name="report_file">room.report_utilization</field>
+    </record>
+
+    <template id="report_utilization">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="office">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Parking Utilization — <t t-esc="office.name"/></h2>
+                        <table class="table table-sm table-bordered o_main_table mt16">
+                            <thead>
+                                <tr style="background:#f8f9fa;">
+                                    <th>Slot</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>EV</th>
+                                    <th>Accessible</th>
+                                    <th>Premium</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="office.room_ids.filtered(lambda r: r.active)" t-as="slot">
+                                    <tr>
+                                        <td><t t-esc="slot.name"/></td>
+                                        <td><t t-esc="dict(slot._fields['slot_type'].selection).get(slot.slot_type, '—')"/></td>
+                                        <td><t t-esc="slot.location or '—'"/></td>
+                                        <td>
+                                            <t t-if="slot.is_available">Available</t>
+                                            <t t-else="">Occupied</t>
+                                        </td>
+                                        <td><t t-esc="'✓' if slot.is_ev_charger else ''"/></td>
+                                        <td><t t-esc="'✓' if slot.is_accessible else ''"/></td>
+                                        <td><t t-esc="'✓' if slot.is_premium else ''"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

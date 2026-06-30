@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ParkSmart access groups.
+         Slot-level allowed_group_ids on room.room uses these to restrict
+         who can book Premium / Leadership / Visitor-only slots. -->
+
+    <record id="res_groups_privilege_parking" model="res.groups.privilege">
+        <field name="name">Parking</field>
+        <field name="sequence">4</field>
+        <field name="category_id" ref="base.module_category_productivity"/>
+    </record>
+
+    <record id="group_parking_employee" model="res.groups">
+        <field name="name">Parking / Employee</field>
+        <field name="privilege_id" ref="res_groups_privilege_parking"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_parking_leadership" model="res.groups">
+        <field name="name">Parking / Leadership</field>
+        <field name="privilege_id" ref="res_groups_privilege_parking"/>
+        <field name="implied_ids" eval="[(4, ref('group_parking_employee'))]"/>
+        <field name="comment">Leadership users can book Premium / VIP parking slots.</field>
+    </record>
+
+    <record id="group_parking_manager" model="res.groups">
+        <field name="name">Parking / Manager</field>
+        <field name="privilege_id" ref="res_groups_privilege_parking"/>
+        <field name="implied_ids" eval="[(4, ref('group_parking_leadership')), (4, ref('hr.group_hr_user'))]"/>
+        <field name="comment">Parking managers configure slots, allocation rules, and override any booking.</field>
+    </record>
+</odoo>

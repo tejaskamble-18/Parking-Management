@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inject the PWA manifest + mobile meta tags into the backend shell.
+         No service worker shipped in this phase — the manifest alone is
+         enough to make the app installable on iOS and Android and gets the
+         "Add to Home Screen" banner on mobile Chrome. A service worker
+         (for offline + push) can be layered on later without changing
+         anything here. -->
+    <template id="parking_webclient_bootstrap" inherit_id="web.layout" name="Parking PWA bootstrap">
+        <xpath expr="//head" position="inside">
+            <link rel="manifest" href="/room/static/src/pwa/manifest.webmanifest"/>
+            <meta name="theme-color" content="#1565C0"/>
+            <meta name="mobile-web-app-capable" content="yes"/>
+            <meta name="apple-mobile-web-app-capable" content="yes"/>
+            <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+            <meta name="apple-mobile-web-app-title" content="Parking"/>
+        </xpath>
+    </template>
+</odoo>

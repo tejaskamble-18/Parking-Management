@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="room_room_view_search" model="ir.ui.view">
+        <field name="name">Room search view</field>
+        <field name="model">room.room</field>
+        <field name="arch" type="xml">
+            <search string="Parking Slot">
+                <field name="name" string="Parking Slot"/>
+                <field name="location"/>
+                <field name="office_id"/>
+                <field name="slot_type"/>
+                <field name="room_properties"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="filter_standard" string="Standard" domain="[('slot_type','=','standard')]"/>
+                <filter name="filter_visitor" string="Visitor" domain="[('slot_type','=','visitor')]"/>
+                <filter name="filter_ev" string="EV Charging" domain="[('slot_type','=','ev_charging')]"/>
+                <filter name="filter_executive" string="Executive" domain="[('slot_type','=','executive')]"/>
+                <separator/>
+                <filter name="filter_available" string="Available Now" domain="[('is_available','=',True)]"/>
+                <filter name="filter_busy"      string="Busy Now"      domain="[('is_available','=',False)]"/>
+                <separator/>
+                <filter name="group_by_office_id"  string="Location"   context="{'group_by': 'office_id'}"/>
+                <filter name="group_by_slot_type"  string="Slot Type"  context="{'group_by': 'slot_type'}"/>
+                <filter name="group_by_floor"      string="Floor"      context="{'group_by': 'floor'}"/>
+                <filter name="group_by_zone"       string="Zone"       context="{'group_by': 'zone'}"/>
+                <filter name="group_by_company_id" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                <filter string="Properties" name="group_by_room_properties" context="{'group_by':'room_properties'}"/>
+                <searchpanel>
+                    <field name="company_id"/>
+                    <field name="office_id" select="multi" domain="[['company_id', '=', company_id]]" enable_counters="1" icon="fa-building"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="room_room_view_kanban" model="ir.ui.view">
+        <field name="name">room.room.view.kanban</field>
+        <field name="model">room.room</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="office_id" sample="1">
+                <field name="is_available"/>
+                <field name="next_booking_start"/>
+                <field name="office_id"/>
+                <field name="slot_type"/>
+                <field name="is_ev_charger"/>
+                <field name="is_premium"/>
+                <field name="current_occupant_id"/>
+                <field name="current_vehicle"/>
+                <field name="active"/>
+                <templates>
+                    <t t-name="card" class="p-0 overflow-hidden">
+                        <!-- Colored top strip by slot type -->
+                        <div t-attf-style="height:5px;background:#{
+                            record.slot_type.raw_value === 'ev_charging' ? '#0dcaf0' :
+                            record.slot_type.raw_value === 'executive' ? '#a855f7' :
+                            record.slot_type.raw_value === 'visitor'    ? '#6c757d' : '#0d6efd'
+                        };"/>
+                        <div class="p-3">
+                            <!-- Row 1: name + feature badges -->
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <field name="name" class="fw-bold fs-5 mb-0"/>
+                                <div class="d-flex gap-1">
+                                    <span t-if="record.is_ev_charger.raw_value"
+                                          class="badge text-bg-info" title="EV Charger">⚡</span>
+                                    <span t-if="record.is_premium.raw_value"
+                                          class="badge text-bg-warning" title="Premium">★</span>
+                                </div>
+                            </div>
+                            <!-- Row 2: slot type label -->
+                            <div class="text-muted small mb-2">
+                                <field name="slot_type"/>
+                            </div>
+                            <!-- Row 3: status badge -->
+                            <div class="mb-2">
+                                <span t-attf-class="badge rounded-pill text-bg-#{record.is_available.raw_value ? 'success' : 'danger'}">
+                                    <t t-if="record.is_available.raw_value">
+                                        Available
+                                        <t t-if="record.next_booking_start.value">
+                                            <t t-set="nbs" t-value="luxon.DateTime.fromISO(record.next_booking_start.raw_value)"/>
+                                            until
+                                            <t t-if="nbs.hasSame(luxon.DateTime.now(), 'day')"
+                                               t-out="nbs.toLocaleString(luxon.DateTime.TIME_SIMPLE)"/>
+                                            <t t-else="" t-out="nbs.toLocaleString(luxon.DateTime.DATE_SHORT)"/>
+                                        </t>
+                                    </t>
+                                    <t t-else="">Busy</t>
+                                </span>
+                            </div>
+                            <!-- Row 4: occupant (when busy) -->
+                            <div t-if="!record.is_available.raw_value" class="d-flex align-items-center gap-2 mt-1">
+                                <field name="current_occupant_id" widget="many2one_avatar_user"
+                                       options="{'size': 24}" class="small"/>
+                                <span t-if="record.current_vehicle.value"
+                                      class="badge text-bg-secondary small">
+                                    <t t-out="record.current_vehicle.value"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="room_room_view_list" model="ir.ui.view">
+        <field name="name">room.room.view.list</field>
+        <field name="model">room.room</field>
+        <field name="arch" type="xml">
+            <list sample="1"
+                  decoration-muted="not active">
+                <!-- hidden fields needed for decorations / conditional logic -->
+                <field name="active" column_invisible="1"/>
+
+                <field name="name" string="Slot" class="fw-bold"/>
+                <field name="availability_status" widget="badge"
+                       string="Status"
+                       decoration-success="availability_status == 'free'"
+                       decoration-danger="availability_status == 'busy'"/>
+                <field name="slot_type" widget="badge"
+                       decoration-info="slot_type == 'ev_charging'"
+                       decoration-warning="slot_type == 'executive'"
+                       decoration-muted="slot_type == 'visitor'"
+                       string="Type"/>
+                <field name="office_id" string="Location"/>
+                <field name="floor" string="Floor" optional="show"/>
+                <field name="zone"  string="Zone"  optional="show"/>
+
+                <!-- Feature flags: compact icon columns -->
+                <field name="is_ev_charger"  string="⚡ EV"       widget="boolean" optional="show"/>
+                <field name="is_accessible"  string="♿ Access"    widget="boolean" optional="show"/>
+                <field name="is_premium"     string="★ Premium"   widget="boolean" optional="show"/>
+
+                <!-- Live occupancy info -->
+                <field name="current_occupant_id"
+                       widget="many2one_avatar_user"
+                       string="Parked By"
+                       optional="show"/>
+                <field name="current_vehicle"
+                       string="Vehicle No."
+                       optional="show"/>
+                <field name="next_booking_start"
+                       string="Next Booking"
+                       widget="datetime"
+                       optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="room_room_view_form" model="ir.ui.view">
+        <field name="name">room.room.view.form</field>
+        <field name="model">room.room</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="active" invisible="1"/>
+                <field name="room_booking_ids" invisible="1" />
+                <field name="is_available" invisible="1"/>
+                <header>
+                    <button string="Open" type="object" name="action_open_booking_view"  invisible="not active"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_bookings" type="object"
+                                class="oe_stat_button" icon="fa-calendar">
+                            <div class="o_stat_info">
+                                <div invisible="not next_booking_start" >
+                                    <span class="o_stat_text">Next Booking</span>
+                                    <field class="o_stat_value" name="next_booking_start"/>
+                                </div>
+                                <span invisible="next_booking_start">No Upcoming Bookings</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div invisible="not name or not active">
+                        <div class="badge rounded-pill text-bg-success float-end fs-6 border-0" invisible="not is_available">
+                            Available
+                        </div>
+                        <div class="badge rounded-pill text-bg-danger float-end fs-6 border-0" invisible="is_available">
+                            Busy
+                        </div>
+                    </div>
+                    <div class="oe_title mb24">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. A-101"/>
+                        </h1>
+                        <div class="o_row">
+                            <field name="office_id" placeholder="e.g. Headquarters"/>
+                        </div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="slot_type"/>
+                            <field name="location" placeholder="e.g. Basement 1 - North"/>
+                            <field name="short_code"/>
+                        </group>
+                        <group>
+                            <field name="room_booking_url" widget="CopyClipboardChar" invisible="not active"/>
+                        </group>
+                    </group>
+                    <group string="Features">
+                        <group>
+                            <field name="is_ev_charger"/>
+                            <field name="is_accessible"/>
+                        </group>
+                        <group>
+                            <field name="is_premium"/>
+                        </group>
+                    </group>
+                    <group string="Allocation Rules">
+                        <field name="allowed_group_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               help="Restrict booking of this slot to specific access groups (e.g. Leadership, Visitor Host). Leave empty for open access."/>
+                        <label for="allowed_group_ids"
+                               string="Tip: add 'Parking / Leadership' to reserve this slot for executives, or 'Parking / Visitor Host' for guest-only bays. Parking Managers always bypass these rules."
+                               class="text-muted fst-italic"/>
+                    </group>
+                    <field name="room_properties" columns="2"/>
+                    <notebook>
+                        <page string="Appearance" name="Appearance">
+                            <group>
+                                <group>
+                                    <field name="bookable_background_color" widget="color"/>
+                                    <field name="booked_background_color" widget="color"/>
+                                </group>
+                                <group>
+                                    <field name="room_background_image" widget="image"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Amenities" name="Amenities">
+                            <field name="description" placeholder="e.g. projector, capacity 6 people"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="room_room_action" model="ir.actions.act_window">
+        <field name="name">Parking Slots</field>
+        <field name="res_model">room.room</field>
+        <field name="path">parking-slots</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create Parking Slots
+          </p>
+          <p>
+            Define the parking slots that employees can reserve.
+          </p>
+        </field>
+    </record>
+</odoo>

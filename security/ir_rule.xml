@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="room_room_comp_rule" model="ir.rule">
+        <field name="name">Room Room MC Rule</field>
+        <field name="model_id" ref="model_room_room"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="room_office_comp_rule" model="ir.rule">
+        <field name="name">Room Office MC Rule</field>
+        <field name="model_id" ref="model_room_office"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="room_booking_own_rule" model="ir.rule">
+        <field name="name">Room Booking: own or visible bookings</field>
+        <field name="model_id" ref="model_room_booking"/>
+        <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
+        <field name="domain_force">[
+            '|', '|',
+                ('organizer_id', '=', user.id),
+                ('employee_id.user_id', '=', user.id),
+                ('room_id.company_id', 'in', company_ids),
+        ]</field>
+    </record>
+
+    <record id="room_booking_manager_rule" model="ir.rule">
+        <field name="name">Room Booking: managers see all in companies</field>
+        <field name="model_id" ref="model_room_booking"/>
+        <field name="groups" eval="[Command.link(ref('group_parking_manager'))]"/>
+        <field name="domain_force">['|', ('room_id', '=', False), ('room_id.company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- Per-employee parking location whitelist.
+         Two rules per model (office, room):
+           * employee rule: restricts to the user's whitelist (ids + descendants
+             via _get_parking_scope_office_ids). If the whitelist is empty,
+             the domain `[(1, '=', 1)]` matches everything (no restriction).
+           * manager rule: always matches everything.
+         ir.rule combines rules on the same model with OR across groups, so a
+         manager who is also a base.group_user gets unrestricted access. -->
+
+    <record id="room_office_user_scope_rule" model="ir.rule">
+        <field name="name">Room Office: employee location whitelist</field>
+        <field name="model_id" ref="model_room_office"/>
+        <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
+        <field name="domain_force">[('id', 'in', user._get_parking_scope_office_ids())] if user.parking_visible_office_ids else [(1, '=', 1)]</field>
+    </record>
+
+    <record id="room_office_manager_scope_rule" model="ir.rule">
+        <field name="name">Room Office: managers bypass whitelist</field>
+        <field name="model_id" ref="model_room_office"/>
+        <field name="groups" eval="[Command.link(ref('group_parking_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="room_room_user_scope_rule" model="ir.rule">
+        <field name="name">Room Room: employee location whitelist</field>
+        <field name="model_id" ref="model_room_room"/>
+        <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
+        <field name="domain_force">[('office_id', 'in', user._get_parking_scope_office_ids())] if user.parking_visible_office_ids else [(1, '=', 1)]</field>
+    </record>
+
+    <record id="room_room_manager_scope_rule" model="ir.rule">
+        <field name="name">Room Room: managers bypass whitelist</field>
+        <field name="model_id" ref="model_room_room"/>
+        <field name="groups" eval="[Command.link(ref('group_parking_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data noupdate="1">
+
+    <!-- B1-01: High usage — Rahul Sharma, full day (today) -->
+    <record id="booking_rahul_today" model="room.booking">
+        <field name="name">Rahul Sharma - Daily Parking</field>
+        <field name="room_id" ref="slot_b1_01"/>
+        <field name="start_datetime" eval="time.strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="stop_datetime" eval="time.strftime('%Y-%m-%d 18:00:00')"/>
+        <field name="vehicle_number">MH-12-AB-1234</field>
+        <field name="organizer_id" ref="base.user_demo"/>
+    </record>
+
+    <!-- B1-02: Medium usage - Priya Mehta, full day (today) -->
+    <record id="booking_priya_today" model="room.booking">
+        <field name="name">Priya Mehta - Daily Parking</field>
+        <field name="room_id" ref="slot_b1_02"/>
+        <field name="start_datetime" eval="time.strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="stop_datetime" eval="time.strftime('%Y-%m-%d 18:00:00')"/>
+        <field name="vehicle_number">MH-14-CD-5678</field>
+        <field name="organizer_id" ref="base.user_admin"/>
+    </record>
+
+    <!-- V-01: Visitor – Client Meeting (today) -->
+    <record id="booking_visitor_client" model="room.booking">
+        <field name="name">Client Meeting - Visitor</field>
+        <field name="room_id" ref="slot_v_01"/>
+        <field name="start_datetime" eval="time.strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="stop_datetime" eval="time.strftime('%Y-%m-%d 14:00:00')"/>
+        <field name="is_guest_booking" eval="True"/>
+        <field name="guest_name">Amit Verma</field>
+        <field name="guest_company">Verma &amp; Associates</field>
+        <field name="guest_vehicle_number">DL-01-EF-9999</field>
+        <field name="organizer_id" ref="base.user_admin"/>
+    </record>
+
+    <!-- G-01: Operations Manager — recurring weekly Monday (today) -->
+    <record id="booking_ops_manager_today" model="room.booking">
+        <field name="name">Operations Manager - Weekly Monday</field>
+        <field name="room_id" ref="slot_g_01"/>
+        <field name="start_datetime" eval="time.strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="stop_datetime" eval="time.strftime('%Y-%m-%d 18:00:00')"/>
+        <field name="vehicle_number">MH-04-GH-4321</field>
+        <field name="is_recurring" eval="True"/>
+        <field name="recurrence_type">weekly</field>
+        <field name="recurrence_end_date" eval="(DateTime.today() + relativedelta(months=3)).strftime('%Y-%m-%d')"/>
+        <field name="organizer_id" ref="base.user_demo"/>
+    </record>
+
+    <!-- B1-01: Yesterday — high usage pattern -->
+    <record id="booking_rahul_yesterday" model="room.booking">
+        <field name="name">Rahul Sharma - Daily Parking</field>
+        <field name="room_id" ref="slot_b1_01"/>
+        <field name="start_datetime" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="stop_datetime" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d 18:00:00')"/>
+        <field name="vehicle_number">MH-12-AB-1234</field>
+        <field name="organizer_id" ref="base.user_demo"/>
+    </record>
+
+    <!-- B1-02: Yesterday — medium usage pattern -->
+    <record id="booking_priya_yesterday" model="room.booking">
+        <field name="name">Priya Mehta - Daily Parking</field>
+        <field name="room_id" ref="slot_b1_02"/>
+        <field name="start_datetime" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="stop_datetime" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d 16:00:00')"/>
+        <field name="vehicle_number">MH-14-CD-5678</field>
+        <field name="organizer_id" ref="base.user_admin"/>
+    </record>
+
+    <!-- B1-03: EV slot — morning usage today -->
+    <record id="booking_ev_morning" model="room.booking">
+        <field name="name">EV Charging - Morning Session</field>
+        <field name="room_id" ref="slot_b1_03"/>
+        <field name="start_datetime" eval="time.strftime('%Y-%m-%d 08:00:00')"/>
+        <field name="stop_datetime" eval="time.strftime('%Y-%m-%d 12:00:00')"/>
+        <field name="vehicle_number">MH-09-EV-0001</field>
+        <field name="organizer_id" ref="base.user_demo"/>
+    </record>
+
+    <!-- W-01: Warehouse staff — today -->
+    <record id="booking_warehouse_today" model="room.booking">
+        <field name="name">Warehouse Staff - Shift Parking</field>
+        <field name="room_id" ref="slot_w_01"/>
+        <field name="start_datetime" eval="time.strftime('%Y-%m-%d 08:00:00')"/>
+        <field name="stop_datetime" eval="time.strftime('%Y-%m-%d 17:00:00')"/>
+        <field name="vehicle_number">MH-20-WH-7777</field>
+        <field name="organizer_id" ref="base.user_admin"/>
+    </record>
+
+    <!-- G-02: Tomorrow booking -->
+    <record id="booking_ground_tomorrow" model="room.booking">
+        <field name="name">Priya Mehta - Ground Parking</field>
+        <field name="room_id" ref="slot_g_02"/>
+        <field name="start_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="stop_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 18:00:00')"/>
+        <field name="vehicle_number">MH-14-CD-5678</field>
+        <field name="organizer_id" ref="base.user_admin"/>
+    </record>
+
+    <!-- V-02: Visitor tomorrow -->
+    <record id="booking_visitor_tomorrow" model="room.booking">
+        <field name="name">Vendor Visit - Visitor Parking</field>
+        <field name="room_id" ref="slot_v_02"/>
+        <field name="start_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 11:00:00')"/>
+        <field name="stop_datetime" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 13:00:00')"/>
+        <field name="is_guest_booking" eval="True"/>
+        <field name="guest_name">Sunita Rao</field>
+        <field name="guest_company">Rao Logistics</field>
+        <field name="guest_vehicle_number">KA-05-GH-3333</field>
+        <field name="organizer_id" ref="base.user_demo"/>
+    </record>
+
+</data>
+</odoo>

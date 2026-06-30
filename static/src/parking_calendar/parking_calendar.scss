@@ -1,0 +1,245 @@
+/* Parking Calendar — Attendance-snapshot style: sidebar + monthly grid */
+
+.o_action_manager:has(.o_parking_calendar),
+.o_client_action:has(> .o_parking_calendar) {
+    overflow: hidden;
+    height: 100%;
+}
+
+.o_parking_calendar {
+    background: #F8FAFC;
+    height: 100%;
+    padding: 24px 28px 40px;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #0F172A;
+    overflow-y: auto;
+
+    * { box-sizing: border-box; }
+
+    /* ── Page header ── */
+    .o_pcal_page_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        h1 { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+        p  { margin: 4px 0 0; color: #64748B; font-size: 13px; }
+    }
+    .o_pcal_btn_primary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%);
+        color: #fff; border: 0; border-radius: 10px;
+        padding: 8px 16px;
+        font-weight: 600; font-size: 13px;
+        box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+        &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,0.35); color: #fff; }
+    }
+
+    /* ── Two-column layout ── */
+    .o_pcal_layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    /* ── Snapshot sidebar ── */
+    .o_pcal_snapshot {
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        border-radius: 14px;
+        padding: 20px 16px;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+    }
+    .o_pcal_snapshot_title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+    }
+    .o_pcal_snapshot_sub {
+        font-size: 11px;
+        color: #94A3B8;
+        margin-bottom: 16px;
+    }
+    .o_pcal_snapshot_rows {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .o_pcal_snap_row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .o_pcal_snap_dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .o_pcal_snap_label {
+        flex: 1;
+        font-size: 13px;
+        color: #374151;
+    }
+    .o_pcal_snap_count {
+        min-width: 28px;
+        text-align: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* ── Right panel ── */
+    .o_pcal_right {
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+    }
+
+    /* Month navigation */
+    .o_pcal_month_nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    .o_pcal_month_label {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0F172A;
+        flex: 1;
+    }
+    .o_pcal_nav_btn {
+        width: 30px; height: 30px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        background: #FFFFFF;
+        color: #475569;
+        cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 12px;
+        &:hover { background: #F1F5F9; color: #0F172A; }
+    }
+    .o_pcal_today_btn {
+        background: transparent;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #2563EB;
+        cursor: pointer;
+        &:hover { background: #EFF6FF; }
+    }
+
+    /* Day-of-week header row */
+    .o_pcal_dow_row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: #F8FAFC;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    .o_pcal_dow {
+        padding: 8px 0;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #94A3B8;
+    }
+
+    /* Calendar grid */
+    .o_pcal_grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .o_pcal_cell {
+        min-height: 90px;
+        padding: 8px 10px;
+        border-right: 1px solid #F1F5F9;
+        border-bottom: 1px solid #F1F5F9;
+        cursor: default;
+        transition: background 0.1s;
+        &:nth-child(7n) { border-right: 0; }
+
+        &.o_pcal_other_month {
+            background: #FAFBFC;
+            .o_pcal_date_num { color: #CBD5E1; }
+        }
+        &.o_pcal_weekend { background: #FAFBFD; }
+        &.o_pcal_has_booking { cursor: pointer; &:hover { background: #F8FAFF; } }
+        &.o_pcal_today { background: #EFF6FF; }
+    }
+
+    .o_pcal_cell_head { margin-bottom: 6px; }
+
+    .o_pcal_date_num {
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+    }
+    .o_pcal_date_today {
+        background: #2563EB;
+        color: #FFFFFF !important;
+    }
+
+    /* Booking chip */
+    .o_pcal_booking_chip {
+        border-radius: 6px;
+        padding: 4px 7px;
+        margin-bottom: 3px;
+        font-size: 11px;
+        line-height: 1.3;
+        border-left: 3px solid transparent;
+    }
+    .o_pcal_chip_slot {
+        display: block;
+        font-weight: 600;
+        color: #0F172A;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .o_pcal_chip_time {
+        display: block;
+        color: #475569;
+        font-size: 10px;
+    }
+
+    /* State colours for chip */
+    .o_pcal_state_confirmed      { background: #DBEAFE; border-left-color: #3B82F6; }
+    .o_pcal_state_checked_in     { background: #DCFCE7; border-left-color: #16A34A; }
+    .o_pcal_state_cancelled      { background: #F1F5F9; border-left-color: #94A3B8; opacity: 0.6; text-decoration: line-through; }
+    .o_pcal_state_no_show        { background: #FEE2E2; border-left-color: #DC2626; }
+    .o_pcal_state_pending_approval { background: #FEF3C7; border-left-color: #D97706; }
+
+    .o_pcal_extra {
+        font-size: 10px;
+        color: #2563EB;
+        font-weight: 600;
+        padding-left: 4px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+        .o_pcal_layout { grid-template-columns: 180px 1fr; }
+    }
+    @media (max-width: 768px) {
+        padding: 16px 12px 28px;
+        .o_pcal_layout { grid-template-columns: 1fr; }
+        .o_pcal_snapshot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .o_pcal_snapshot_rows { flex-direction: row; flex-wrap: wrap; }
+        .o_pcal_cell { min-height: 60px; padding: 4px 6px; }
+    }
+}

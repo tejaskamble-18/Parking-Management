@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.SmartSuggest">
+        <!-- Hidden while loading or when backend returned null (< 3 bookings) -->
+        <t t-if="!state.loading and state.patterns">
+            <div class="o_parking_rail_card o_ss_card">
+                <div class="o_parking_rail_title">
+                    <i class="fa fa-lightbulb-o me-1" style="color:#F59E0B"/>
+                    My Parking Pattern
+                </div>
+
+                <p class="o_ss_suggestion" t-esc="state.patterns.suggestion"/>
+
+                <div class="o_ss_tags">
+                    <t t-if="state.patterns.preferred_days.length">
+                        <t t-foreach="state.patterns.preferred_days" t-as="day" t-key="day">
+                            <span class="o_ss_tag o_ss_tag_day" t-esc="day"/>
+                        </t>
+                    </t>
+                    <t t-if="state.patterns.preferred_hour">
+                        <span class="o_ss_tag o_ss_tag_time">
+                            <i class="fa fa-clock-o"/> <t t-esc="state.patterns.preferred_hour"/>
+                        </span>
+                    </t>
+                    <t t-if="state.patterns.preferred_zone">
+                        <span class="o_ss_tag o_ss_tag_zone">
+                            <i class="fa fa-map-marker"/> Zone <t t-esc="state.patterns.preferred_zone"/>
+                        </span>
+                    </t>
+                </div>
+
+                <div t-if="noShowBadge" t-att-class="'o_ss_badge ' + noShowBadge.cls">
+                    <i class="fa fa-exclamation-triangle"/> <t t-esc="noShowBadge.label"/>
+                </div>
+
+                <button class="btn o_parking_btn_primary o_ss_book_btn"
+                        t-on-click="onBookUsual">
+                    <i class="fa fa-bolt"/> Book my usual
+                </button>
+            </div>
+        </t>
+        <t t-elif="!state.loading and !state.patterns">
+            <div class="o_parking_rail_card o_ss_card o_ss_nudge">
+                <div class="o_parking_rail_title">
+                    <i class="fa fa-lightbulb-o me-1" style="color:#F59E0B"/>
+                    My Parking Pattern
+                </div>
+                <p class="o_ss_suggestion">Make 3 bookings to unlock personalised suggestions.</p>
+            </div>
+        </t>
+    </t>
+
+</templates>

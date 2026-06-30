@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.QuickBookDialog">
+        <Dialog title="'Quick Book'" size="'md'" contentClass="'o_quick_book_dialog'">
+            <div class="o_qb_body">
+                <p class="o_qb_sub">Pick a time window — we'll auto-assign the best available slot.</p>
+
+                <div class="o_qb_preset_row">
+                    <button class="o_qb_chip" t-on-click="() => this.applyPreset(1)">
+                        <i class="fa fa-bolt"/> 1 hour now
+                    </button>
+                    <button class="o_qb_chip" t-on-click="() => this.applyPreset(2)">2 hours now</button>
+                    <button class="o_qb_chip" t-on-click="() => this.applyPreset(4)">4 hours now</button>
+                    <button class="o_qb_chip" t-on-click="() => this.applyPreset(8)">Full day</button>
+                </div>
+
+                <div class="o_qb_field_row">
+                    <label class="o_qb_field">
+                        <span>Start</span>
+                        <input type="datetime-local" t-ref="startInput"
+                               t-model="state.startDatetime"/>
+                    </label>
+                    <label class="o_qb_field">
+                        <span>End</span>
+                        <input type="datetime-local" t-model="state.stopDatetime"/>
+                    </label>
+                </div>
+
+                <label class="o_qb_field">
+                    <span>Vehicle number (optional)</span>
+                    <input type="text" maxlength="40" placeholder="KA-01-AB-1234"
+                           t-model="state.vehicleNumber"/>
+                </label>
+
+                <div class="o_qb_prefs">
+                    <button class="o_qb_pref"
+                            t-att-class="{'o_active': state.preferEv}"
+                            t-on-click="() => this.togglePref('preferEv')">
+                        <i class="fa fa-bolt"/> EV charger
+                    </button>
+                    <button class="o_qb_pref"
+                            t-att-class="{'o_active': state.preferAccessible}"
+                            t-on-click="() => this.togglePref('preferAccessible')">
+                        <i class="fa fa-wheelchair"/> Accessible
+                    </button>
+                    <select t-if="state.offices.length" t-model="state.officeId" class="o_qb_office">
+                        <option value="">Any office</option>
+                        <t t-foreach="state.offices" t-as="o" t-key="o.id">
+                            <option t-att-value="o.id" t-esc="o.name"/>
+                        </t>
+                    </select>
+                </div>
+
+                <div t-if="state.error" class="o_qb_error">
+                    <i class="fa fa-exclamation-triangle"/> <t t-esc="state.error"/>
+                </div>
+            </div>
+
+            <t t-set-slot="footer">
+                <button class="btn btn-link" t-on-click="cancel" t-att-disabled="state.busy">
+                    Cancel
+                </button>
+                <button class="btn btn-primary o_qb_submit" t-on-click="submit" t-att-disabled="state.busy">
+                    <t t-if="state.busy">
+                        <i class="fa fa-spinner fa-spin"/> Booking…
+                    </t>
+                    <t t-else="">
+                        <i class="fa fa-check"/> Book now
+                    </t>
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

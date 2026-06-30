@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.ParkingCalendar">
+        <div class="o_parking_calendar">
+
+            <t t-if="state.loading and !state.snapshot">
+                <div class="o_ps_skeleton_page">
+                    <div class="o_ps_skeleton o_ps_sk_header"/>
+                    <div class="o_ps_skeleton o_ps_sk_toolbar"/>
+                    <div class="o_ps_skeleton o_ps_sk_table"/>
+                </div>
+            </t>
+
+            <t t-else="">
+                <!-- ── Page header ── -->
+                <div class="o_pcal_page_header">
+                    <div>
+                        <h1>My Calendar</h1>
+                        <p>Your parking bookings at a glance <span class="o_ps_live_chip">LIVE</span></p>
+                    </div>
+                    <button class="btn o_pcal_btn_primary" t-on-click="onQuickBook">
+                        <i class="fa fa-bolt"/> Quick Book
+                    </button>
+                </div>
+
+                <!-- ── Two-column layout ── -->
+                <div class="o_pcal_layout">
+
+                    <!-- LEFT: snapshot sidebar -->
+                    <div class="o_pcal_snapshot">
+                        <div class="o_pcal_snapshot_title">Booking Snapshot</div>
+                        <div class="o_pcal_snapshot_sub">Current period overview</div>
+
+                        <div class="o_pcal_snapshot_rows">
+                            <t t-foreach="snapshotRows" t-as="row" t-key="row.label">
+                                <div class="o_pcal_snap_row">
+                                    <span class="o_pcal_snap_dot"
+                                          t-att-style="'background:' + row.color"/>
+                                    <span class="o_pcal_snap_label" t-esc="row.label"/>
+                                    <span class="o_pcal_snap_count"
+                                          t-att-style="'background:' + row.bg + ';color:' + row.color"
+                                          t-esc="row.count"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: monthly calendar -->
+                    <div class="o_pcal_right">
+
+                        <!-- Month navigation -->
+                        <div class="o_pcal_month_nav">
+                            <button class="o_pcal_nav_btn" t-on-click="prevMonth">
+                                <i class="fa fa-chevron-left"/>
+                            </button>
+                            <span class="o_pcal_month_label" t-esc="monthLabel"/>
+                            <button class="o_pcal_nav_btn" t-on-click="nextMonth">
+                                <i class="fa fa-chevron-right"/>
+                            </button>
+                            <button class="o_pcal_today_btn" t-on-click="goToday">Today</button>
+                        </div>
+
+                        <!-- Day-of-week headers -->
+                        <div class="o_pcal_dow_row">
+                            <t t-foreach="dayLabels" t-as="dl" t-key="dl">
+                                <div class="o_pcal_dow" t-esc="dl"/>
+                            </t>
+                        </div>
+
+                        <!-- Calendar grid -->
+                        <div class="o_pcal_grid">
+                            <t t-foreach="calendarWeeks" t-as="week" t-key="week_index">
+                                <t t-foreach="week" t-as="cell" t-key="cell.dateStr">
+                                    <div t-att-class="'o_pcal_cell'
+                                            + (cell.isCurrentMonth ? '' : ' o_pcal_other_month')
+                                            + (cell.isToday ? ' o_pcal_today' : '')
+                                            + (cell.isWeekend ? ' o_pcal_weekend' : '')
+                                            + (cell.primary ? ' o_pcal_has_booking' : '')"
+                                         t-on-click="() => this.onDayClick(cell)">
+
+                                        <!-- Date number circle -->
+                                        <div class="o_pcal_cell_head">
+                                            <span t-att-class="'o_pcal_date_num'
+                                                    + (cell.isToday ? ' o_pcal_date_today' : '')
+                                                    + (cell.primary ? ' o_pcal_date_' + cell.primary.state : '')"
+                                                  t-esc="cell.dateNum"/>
+                                        </div>
+
+                                        <!-- Primary booking info -->
+                                        <t t-if="cell.primary">
+                                            <div t-att-class="'o_pcal_booking_chip o_pcal_state_' + cell.primary.state">
+                                                <span class="o_pcal_chip_slot" t-esc="cell.primary.slot"/>
+                                                <span class="o_pcal_chip_time" t-esc="cell.primary.time"/>
+                                            </div>
+                                            <t t-if="cell.extra">
+                                                <div class="o_pcal_extra" t-esc="cell.extra + ' more'"/>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </t>
+                            </t>
+                        </div>
+
+                    </div><!-- /.o_pcal_right -->
+                </div><!-- /.o_pcal_layout -->
+            </t>
+
+        </div>
+    </t>
+
+</templates>

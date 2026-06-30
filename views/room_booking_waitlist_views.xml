@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_room_booking_waitlist_list" model="ir.ui.view">
+        <field name="name">room.booking.waitlist.list</field>
+        <field name="model">room.booking.waitlist</field>
+        <field name="arch" type="xml">
+            <list string="Waitlist" sample="1" default_order="create_date asc">
+                <field name="create_date" string="Requested"/>
+                <field name="room_id" string="Slot"/>
+                <field name="user_id"/>
+                <field name="vehicle_number"/>
+                <field name="desired_start"/>
+                <field name="desired_stop"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'waiting'"
+                       decoration-success="state == 'promoted'"
+                       decoration-muted="state in ('expired','cancelled')"/>
+                <field name="promoted_booking_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_room_booking_waitlist_form" model="ir.ui.view">
+        <field name="name">room.booking.waitlist.form</field>
+        <field name="model">room.booking.waitlist</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_promote" type="object"
+                            string="Try Promote Now"
+                            class="btn-primary"
+                            invisible="state != 'waiting'"
+                            groups="room.group_parking_manager"
+                            help="Attempt to turn this waitlist entry into a real booking. Succeeds only if the slot is free in the desired window."/>
+                    <button name="action_leave_waitlist" type="object"
+                            string="Leave Waitlist"
+                            class="btn-secondary"
+                            invisible="state != 'waiting'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="waiting,promoted"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="room_id" options="{'no_create_edit': True}"/>
+                            <field name="user_id" options="{'no_create_edit': True}"/>
+                            <field name="employee_id" options="{'no_create_edit': True}"/>
+                            <field name="vehicle_number"/>
+                        </group>
+                        <group>
+                            <field name="desired_start"/>
+                            <field name="desired_stop"/>
+                            <field name="promoted_booking_id" readonly="1"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_room_booking_waitlist_search" model="ir.ui.view">
+        <field name="name">room.booking.waitlist.search</field>
+        <field name="model">room.booking.waitlist</field>
+        <field name="arch" type="xml">
+            <search string="Waitlist">
+                <field name="room_id"/>
+                <field name="user_id"/>
+                <field name="vehicle_number"/>
+                <filter name="filter_waiting" string="Still Waiting" domain="[('state', '=', 'waiting')]"/>
+                <filter name="filter_promoted" string="Promoted" domain="[('state', '=', 'promoted')]"/>
+                <separator/>
+                <filter name="filter_mine" string="My Entries" domain="[('user_id', '=', uid)]"/>
+                <filter name="group_by_slot" string="Slot" context="{'group_by': 'room_id'}"/>
+                <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_room_booking_waitlist" model="ir.actions.act_window">
+        <field name="name">Waitlist</field>
+        <field name="res_model">room.booking.waitlist</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_waiting': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No one is waiting — every booking request fits.</p>
+            <p>When users try to book a slot that is already taken during their
+               desired time, their request lands here. The oldest waiting entry
+               is auto-promoted the moment the slot frees up (cancellation or no-show).</p>
+        </field>
+    </record>
+
+</odoo>

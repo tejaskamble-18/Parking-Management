@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_parking" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.parking</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Parking Management" string="Parking Management" name="room" groups="room.group_parking_manager">
+                    <block title="No-show Policy" id="parking_no_show_block">
+                        <setting id="parking_no_show_grace" help="Minutes past booking start before an unchecked-in booking is flagged no_show.">
+                            <label for="parking_no_show_grace_minutes"/>
+                            <div class="content-group">
+                                <field name="parking_no_show_grace_minutes" class="oe_inline"/> minutes
+                            </div>
+                        </setting>
+                        <setting id="parking_no_show_penalty" help="Points subtracted from a user's priority score on each no-show.">
+                            <label for="parking_no_show_penalty_points"/>
+                            <div class="content-group">
+                                <field name="parking_no_show_penalty_points" class="oe_inline"/> points
+                            </div>
+                        </setting>
+                        <setting id="parking_ban_threshold_setting" help="Temp-ban is applied once a user reaches this many no-shows.">
+                            <label for="parking_ban_threshold"/>
+                            <div class="content-group">
+                                <field name="parking_ban_threshold" class="oe_inline"/> no-shows
+                            </div>
+                        </setting>
+                        <setting id="parking_ban_duration_setting">
+                            <label for="parking_ban_duration_days"/>
+                            <div class="content-group">
+                                <field name="parking_ban_duration_days" class="oe_inline"/> days
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="EV Charging Limits" id="parking_ev_block">
+                        <setting id="parking_ev_max_hours" help="Hard cap on the length of one booking on an EV slot. Override per-slot on the slot form.">
+                            <label for="parking_ev_max_hours_per_booking"/>
+                            <div class="content-group">
+                                <field name="parking_ev_max_hours_per_booking" class="oe_inline"/> hours
+                            </div>
+                        </setting>
+                        <setting id="parking_ev_daily" help="Per-user daily cap summed across all EV bookings.">
+                            <label for="parking_ev_daily_cap_minutes"/>
+                            <div class="content-group">
+                                <field name="parking_ev_daily_cap_minutes" class="oe_inline"/> minutes / day
+                            </div>
+                        </setting>
+                        <setting id="parking_ev_cooldown" help="Minimum gap between two consecutive bookings on the same EV slot.">
+                            <label for="parking_ev_cooldown_minutes"/>
+                            <div class="content-group">
+                                <field name="parking_ev_cooldown_minutes" class="oe_inline"/> minutes
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Smart Allocation Scoring" id="parking_score_block">
+                        <setting id="parking_score_leadership">
+                            <label for="parking_score_weight_leadership"/>
+                            <field name="parking_score_weight_leadership"/>
+                        </setting>
+                        <setting id="parking_score_ev">
+                            <label for="parking_score_weight_ev"/>
+                            <field name="parking_score_weight_ev"/>
+                        </setting>
+                        <setting id="parking_score_fairness">
+                            <label for="parking_score_weight_fairness"/>
+                            <field name="parking_score_weight_fairness"/>
+                        </setting>
+                        <setting id="parking_fairness_window">
+                            <label for="parking_fairness_window_days"/>
+                            <div class="content-group">
+                                <field name="parking_fairness_window_days" class="oe_inline"/> days
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Microsoft 365 Integration" id="parking_m365_block">
+                        <setting id="parking_outlook_sync_setting"
+                                 help="Mirrors every booking create/update/cancel to the organiser's Outlook calendar via Microsoft Graph.">
+                            <field name="parking_outlook_sync_enabled"/>
+                            <label for="parking_outlook_sync_enabled"/>
+                            <div class="text-muted mt-1">
+                                Requires the user's Microsoft account to be connected under
+                                <em>Calendar → Configuration → Microsoft Calendar</em>.
+                            </div>
+                        </setting>
+                        <setting id="parking_outlook_pull_setting"
+                                 help="Cron runs every 15 min and cancels parking bookings whose Outlook event was deleted or cancelled by the user.">
+                            <field name="parking_outlook_pull_enabled"/>
+                            <label for="parking_outlook_pull_enabled"/>
+                        </setting>
+                        <setting id="parking_teams_webhook_setting"
+                                 help="Paste an Incoming Webhook URL from a Teams channel connector. Leave empty to disable.">
+                            <label for="parking_teams_webhook_url"/>
+                            <field name="parking_teams_webhook_url" placeholder="https://outlook.office.com/webhook/..."/>
+                        </setting>
+                        <setting id="parking_outlook_test_setting"
+                                 help="Checks that your Microsoft account is linked and Graph API is reachable.">
+                            <div class="o_form_label">Connection Test</div>
+                            <div class="content-group">
+                                <button class="btn btn-secondary"
+                                        type="object"
+                                        name="action_test_outlook_connection"
+                                        string="Test Outlook Connection"
+                                        icon="fa-plug"/>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_parking_config_settings" model="ir.actions.act_window">
+        <field name="name">Parking Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'room'}</field>
+    </record>
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="room.LocationPicker">
+    <div class="o_lp" t-ref="root" t-att-class="'o_lp o_lp_' + props.theme + (state.open ? ' o_lp_open' : '')">
+        <!-- Trigger button -->
+        <button type="button" class="o_lp_trigger" t-ref="trigger" t-on-click.stop="toggleOpen">
+            <i class="fa fa-map-marker"/>
+            <span class="o_lp_label">
+                <t t-esc="selectedLabel"/>
+            </span>
+            <span class="o_lp_trigger_meta">
+                <t t-esc="selectedMeta.free_count"/>/<t t-esc="selectedMeta.slot_count"/> free
+            </span>
+            <i class="fa fa-caret-down o_lp_caret"/>
+        </button>
+
+        <!-- Dropdown panel (compact, fixed-positioned to escape scroll-container clipping) -->
+        <div class="o_lp_panel" t-ref="panel" t-if="state.open"
+             t-att-style="state.panelStyle" t-on-click.stop="">
+            <div class="o_lp_list">
+                <!-- All Locations row (inline with office list to keep it compact) -->
+                <button type="button"
+                        t-att-class="'o_lp_item o_lp_item_all' + (!props.selectedId ? ' o_lp_item_active' : '')"
+                        t-on-click="() => this.select(null)">
+                    <span class="o_lp_item_left">
+                        <span class="o_lp_dot o_lp_dot_green"/>
+                        <span class="o_lp_item_name">All Locations</span>
+                    </span>
+                    <span class="o_lp_item_right">
+                        <span class="o_lp_pill o_lp_pill_free">
+                            <t t-esc="selectedMeta.free_count"/>/<t t-esc="selectedMeta.slot_count"/>
+                        </span>
+                    </span>
+                </button>
+
+                <t t-foreach="props.offices" t-as="office" t-key="office.id">
+                    <button type="button"
+                            t-att-class="'o_lp_item' + (props.selectedId === office.id ? ' o_lp_item_active' : '')"
+                            t-att-style="'padding-left: ' + (12 + office.depth * 14) + 'px'"
+                            t-on-click="() => this.select(office.id)">
+                        <span class="o_lp_item_left">
+                            <span t-att-class="'o_lp_dot ' + (office.free_count > 0 ? 'o_lp_dot_green' : 'o_lp_dot_red')"/>
+                            <span class="o_lp_item_name" t-esc="office.name"/>
+                            <span t-att-class="'o_lp_badge o_lp_badge_' + office.location_type"
+                                  t-esc="typeLabel(office.location_type)"/>
+                        </span>
+                        <span class="o_lp_item_right">
+                            <span t-att-class="'o_lp_pill ' + (office.free_count > 0 ? 'o_lp_pill_free' : 'o_lp_pill_busy')">
+                                <t t-esc="office.free_count"/>/<t t-esc="office.slot_count"/>
+                            </span>
+                        </span>
+                    </button>
+                </t>
+            </div>
+        </div>
+    </div>
+</t>
+
+</templates>

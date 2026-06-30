@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data noupdate="1">
+
+    <!-- Head Office – Basement Parking (B1-01 to B1-05) -->
+    <record id="slot_b1_01" model="room.room">
+        <field name="name">B1-01</field>
+        <field name="office_id" ref="room_office_basement"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Basement Level 1</field>
+        <field name="zone">North</field>
+        <field name="floor">B1</field>
+        <field name="short_code">b1-01</field>
+    </record>
+    <record id="slot_b1_02" model="room.room">
+        <field name="name">B1-02</field>
+        <field name="office_id" ref="room_office_basement"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Basement Level 1</field>
+        <field name="zone">North</field>
+        <field name="floor">B1</field>
+        <field name="short_code">b1-02</field>
+    </record>
+    <record id="slot_b1_03" model="room.room">
+        <field name="name">B1-03</field>
+        <field name="office_id" ref="room_office_basement"/>
+        <field name="slot_type">ev_charging</field>
+        <field name="is_ev_charger" eval="True"/>
+        <field name="location">Basement Level 1</field>
+        <field name="zone">North</field>
+        <field name="floor">B1</field>
+        <field name="short_code">b1-03</field>
+    </record>
+    <record id="slot_b1_04" model="room.room">
+        <field name="name">B1-04</field>
+        <field name="office_id" ref="room_office_basement"/>
+        <field name="slot_type">executive</field>
+        <field name="is_premium" eval="True"/>
+        <field name="location">Basement Level 1</field>
+        <field name="zone">South</field>
+        <field name="floor">B1</field>
+        <field name="short_code">b1-04</field>
+    </record>
+    <record id="slot_b1_05" model="room.room">
+        <field name="name">B1-05</field>
+        <field name="office_id" ref="room_office_basement"/>
+        <field name="slot_type">standard</field>
+        <field name="is_accessible" eval="True"/>
+        <field name="location">Basement Level 1</field>
+        <field name="zone">South</field>
+        <field name="floor">B1</field>
+        <field name="short_code">b1-05</field>
+    </record>
+
+    <!-- Main Building – Ground Parking (G-01 to G-05) -->
+    <record id="slot_g_01" model="room.room">
+        <field name="name">G-01</field>
+        <field name="office_id" ref="room_office_ground"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Ground Floor</field>
+        <field name="zone">East Wing</field>
+        <field name="floor">G</field>
+        <field name="short_code">g-01</field>
+    </record>
+    <record id="slot_g_02" model="room.room">
+        <field name="name">G-02</field>
+        <field name="office_id" ref="room_office_ground"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Ground Floor</field>
+        <field name="zone">East Wing</field>
+        <field name="floor">G</field>
+        <field name="short_code">g-02</field>
+    </record>
+    <record id="slot_g_03" model="room.room">
+        <field name="name">G-03</field>
+        <field name="office_id" ref="room_office_ground"/>
+        <field name="slot_type">ev_charging</field>
+        <field name="is_ev_charger" eval="True"/>
+        <field name="location">Ground Floor</field>
+        <field name="zone">West Wing</field>
+        <field name="floor">G</field>
+        <field name="short_code">g-03</field>
+    </record>
+    <record id="slot_g_04" model="room.room">
+        <field name="name">G-04</field>
+        <field name="office_id" ref="room_office_ground"/>
+        <field name="slot_type">executive</field>
+        <field name="is_premium" eval="True"/>
+        <field name="location">Ground Floor</field>
+        <field name="zone">West Wing</field>
+        <field name="floor">G</field>
+        <field name="short_code">g-04</field>
+    </record>
+    <record id="slot_g_05" model="room.room">
+        <field name="name">G-05</field>
+        <field name="office_id" ref="room_office_ground"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Ground Floor</field>
+        <field name="zone">East Wing</field>
+        <field name="floor">G</field>
+        <field name="short_code">g-05</field>
+    </record>
+
+    <!-- Visitor Parking – Front Gate (V-01 to V-03) -->
+    <record id="slot_v_01" model="room.room">
+        <field name="name">V-01</field>
+        <field name="office_id" ref="room_office_visitor"/>
+        <field name="slot_type">visitor</field>
+        <field name="location">Front Gate</field>
+        <field name="zone">Visitor</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">v-01</field>
+    </record>
+    <record id="slot_v_02" model="room.room">
+        <field name="name">V-02</field>
+        <field name="office_id" ref="room_office_visitor"/>
+        <field name="slot_type">visitor</field>
+        <field name="location">Front Gate</field>
+        <field name="zone">Visitor</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">v-02</field>
+    </record>
+    <record id="slot_v_03" model="room.room">
+        <field name="name">V-03</field>
+        <field name="office_id" ref="room_office_visitor"/>
+        <field name="slot_type">visitor</field>
+        <field name="location">Front Gate</field>
+        <field name="zone">Visitor</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">v-03</field>
+    </record>
+
+    <!-- Warehouse Staff Parking (W-01 to W-04) -->
+    <record id="slot_w_01" model="room.room">
+        <field name="name">W-01</field>
+        <field name="office_id" ref="room_office_warehouse"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Warehouse Rear</field>
+        <field name="zone">Staff</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">w-01</field>
+    </record>
+    <record id="slot_w_02" model="room.room">
+        <field name="name">W-02</field>
+        <field name="office_id" ref="room_office_warehouse"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Warehouse Rear</field>
+        <field name="zone">Staff</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">w-02</field>
+    </record>
+    <record id="slot_w_03" model="room.room">
+        <field name="name">W-03</field>
+        <field name="office_id" ref="room_office_warehouse"/>
+        <field name="slot_type">standard</field>
+        <field name="location">Warehouse Rear</field>
+        <field name="zone">Staff</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">w-03</field>
+    </record>
+    <record id="slot_w_04" model="room.room">
+        <field name="name">W-04</field>
+        <field name="office_id" ref="room_office_warehouse"/>
+        <field name="slot_type">ev_charging</field>
+        <field name="is_ev_charger" eval="True"/>
+        <field name="location">Warehouse Rear</field>
+        <field name="zone">Staff</field>
+        <field name="floor">Ground</field>
+        <field name="short_code">w-04</field>
+    </record>
+
+</data>
+</odoo>

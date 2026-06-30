@@ -1,0 +1,262 @@
+.o_action_manager:has(.o_parking_analytics),
+.o_client_action:has(> .o_parking_analytics) {
+    overflow: hidden;
+    height: 100%;
+}
+.o_parking_analytics {
+    padding: 24px 28px 40px;
+    background: #F8FAFC;
+    height: 100%;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #0F172A;
+    overflow-y: auto;
+    * { box-sizing: border-box; }
+
+    // ── Header ──────────────────────────────────────────────
+    .o_pa_header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 20px;
+        h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+        p  { margin: 3px 0 0; color: #64748B; font-size: 13px; }
+    }
+    .o_pa_header_controls { display: flex; align-items: center; gap: 10px; }
+
+    .o_pa_range_tabs {
+        display: flex;
+        background: #F1F5F9;
+        border-radius: 10px;
+        padding: 3px;
+        gap: 2px;
+    }
+    .o_pa_range_tab {
+        padding: 5px 14px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748B;
+        cursor: pointer;
+        transition: all .15s;
+        &.active {
+            background: #fff;
+            color: #0F172A;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(15,23,42,.08);
+        }
+        &:hover:not(.active) { color: #0F172A; }
+    }
+
+    // ── Base card ───────────────────────────────────────────
+    .o_pa_card {
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 14px;
+        padding: 16px 18px;
+        box-shadow: 0 1px 2px rgba(15,23,42,.03);
+    }
+    .o_pa_card_head {
+        display: flex; align-items: baseline; gap: 10px;
+        margin-bottom: 12px;
+    }
+    .o_pa_card_title { font-weight: 700; font-size: 14px; color: #0F172A; }
+    .o_pa_card_sub   { font-size: 11.5px; color: #94A3B8; }
+
+    // ── KPI row ─────────────────────────────────────────────
+    .o_pa_kpi_row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+    .o_pa_kpi_card {
+        border-radius: 14px;
+        padding: 16px 18px;
+        display: flex; align-items: center; gap: 14px;
+        border: none;
+        transition: transform .15s, box-shadow .15s;
+        &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,23,42,.10); }
+    }
+    .o_pa_kpi_blue   { background: linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%); }
+    .o_pa_kpi_purple { background: linear-gradient(135deg, #EDE9FE 0%, #F5F3FF 100%); }
+    .o_pa_kpi_teal   { background: linear-gradient(135deg, #CCFBF1 0%, #F0FDF4 100%); }
+    .o_pa_kpi_amber  { background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%); }
+    .o_pa_kpi_icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        background: rgba(255,255,255,.7);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px; flex-shrink: 0;
+        .o_pa_kpi_blue &   { color: #1D4ED8; }
+        .o_pa_kpi_purple & { color: #6D28D9; }
+        .o_pa_kpi_teal &   { color: #0F766E; }
+        .o_pa_kpi_amber &  { color: #B45309; }
+    }
+    .o_pa_kpi_value { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+    .o_pa_kpi_label { color: #64748B; font-size: 12px; font-weight: 500; margin-top: 2px; }
+
+    // ── 3-column chart row ──────────────────────────────────
+    .o_pa_row_3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    // ── Heatmap + donut row ─────────────────────────────────
+    .o_pa_row_heatmap {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    // ── 2-column row ────────────────────────────────────────
+    .o_pa_row_2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    // ── Charts (SVG) ────────────────────────────────────────
+    .o_pa_chart { width: 100%; height: auto; display: block; }
+    .o_pa_axis_text { fill: #CBD5E1; font-size: 10px; }
+
+    // ── Heatmap ─────────────────────────────────────────────
+    .o_pa_heatmap_card .o_ps_heatmap { margin-top: 6px; }
+
+    // ── Donut ───────────────────────────────────────────────
+    .o_pa_donut_block {
+        display: flex; flex-direction: column; align-items: center; gap: 12px;
+        padding: 4px 0;
+    }
+    .o_pa_donut_svg { flex-shrink: 0; }
+    .o_pa_legend { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .o_pa_legend_row {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 12px;
+    }
+    .o_pa_legend_dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .o_pa_legend_name {
+        flex: 1; color: #374151;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .o_pa_legend_pct  { font-weight: 600; color: #0F172A; flex-shrink: 0; }
+
+    // ── Forecast ────────────────────────────────────────────
+    .o_pa_forecast_bars {
+        display: flex; gap: 8px; align-items: flex-end;
+        height: 140px; padding: 0 2px 10px;
+    }
+    .o_pa_forecast_col {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; gap: 3px; height: 100%;
+    }
+    .o_pa_forecast_pct   { font-size: 10px; font-weight: 700; color: #64748B; }
+    .o_pa_forecast_track {
+        flex: 1; width: 100%; background: #F1F5F9;
+        border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden;
+    }
+    .o_pa_forecast_fill  { width: 100%; border-radius: 6px 6px 0 0; transition: height .4s; min-height: 2px; }
+    .o_pa_forecast_label { font-size: 10.5px; font-weight: 600; color: #374151; }
+    .o_pa_forecast_count { font-size: 10px; color: #94A3B8; }
+    .o_pa_forecast_legend {
+        display: flex; gap: 14px; align-items: center;
+        padding: 6px 2px 0; font-size: 11px; color: #64748B;
+    }
+    .o_pa_fc_dot {
+        display: inline-block; width: 9px; height: 9px;
+        border-radius: 50%; margin-right: 3px;
+    }
+
+    // ── Tables ──────────────────────────────────────────────
+    .o_pa_top_table {
+        width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;
+        thead th {
+            font-size: 10.5px; letter-spacing: 0.06em; color: #94A3B8;
+            font-weight: 600; text-align: left; padding: 6px 8px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        tbody td {
+            padding: 10px 8px; border-bottom: 1px solid #F8FAFC;
+            vertical-align: middle;
+        }
+        tbody tr:last-child td { border-bottom: 0; }
+    }
+    .o_pa_user  { display: flex; align-items: center; gap: 8px; }
+    .o_pa_avatar {
+        width: 28px; height: 28px; border-radius: 50%;
+        color: #fff; font-weight: 700; font-size: 11px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .o_pa_user_name { font-weight: 500; color: #0F172A; }
+    .o_pa_dept_chip {
+        display: inline-block; padding: 2px 8px;
+        background: #F1F5F9; color: #475569;
+        border-radius: 999px; font-size: 11px; font-weight: 500;
+    }
+    .o_pa_util { display: flex; align-items: center; gap: 8px; }
+    .o_pa_util_bar {
+        flex: 1; height: 5px; border-radius: 999px;
+        background: #F1F5F9; overflow: hidden;
+    }
+    .o_pa_util_fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3B82F6, #60A5FA);
+        border-radius: 999px; transition: width .3s;
+    }
+    .o_pa_util_val { font-weight: 600; font-size: 11.5px; color: #0F172A; min-width: 34px; text-align: right; }
+
+    // ── No-show strip ───────────────────────────────────────
+    .o_pa_ns_strip {
+        display: flex; align-items: flex-start; gap: 20px; margin-bottom: 14px;
+    }
+    .o_pa_ns_badge {
+        flex-shrink: 0; min-width: 140px;
+        background: linear-gradient(135deg, #FEF3C7, #FEE2E2);
+        border: 1px solid #FCD34D; border-radius: 12px;
+        padding: 14px 16px; text-align: center;
+    }
+    .o_pa_ns_value {
+        font-size: 40px; font-weight: 800; color: #B45309;
+        line-height: 1; letter-spacing: -0.02em;
+        span { font-size: 20px; }
+    }
+    .o_pa_ns_meta { font-weight: 700; font-size: 12px; color: #92400E; margin-top: 4px; }
+    .o_pa_ns_sub  { font-size: 11px; color: #B45309; margin-top: 2px; }
+    .o_pa_ns_table_wrap { flex: 1; }
+
+    // ── Empty states ────────────────────────────────────────
+    .o_pa_empty_tile {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 28px 12px; color: #94A3B8; gap: 6px;
+        i { font-size: 20px; color: #CBD5E1; }
+        span { font-size: 12.5px; }
+    }
+    .o_pa_empty_label { color: #94A3B8; font-size: 12.5px; }
+
+    // ── Location filter ─────────────────────────────────────
+    .o_parking_location_filter {
+        display: flex; align-items: center; gap: 7px;
+        background: #fff; border: 1px solid #E5E7EB;
+        border-radius: 10px; padding: 6px 12px;
+        i { color: #94A3B8; font-size: 13px; }
+        select {
+            border: none; background: transparent;
+            font-size: 13px; font-weight: 500; color: #0F172A;
+            outline: none; cursor: pointer;
+        }
+    }
+
+    // ── Responsive ──────────────────────────────────────────
+    @media (max-width: 1100px) {
+        .o_pa_kpi_row    { grid-template-columns: repeat(2, 1fr); }
+        .o_pa_row_3      { grid-template-columns: 1fr 1fr; }
+        .o_pa_row_heatmap{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+        .o_pa_row_3, .o_pa_row_2 { grid-template-columns: 1fr; }
+        .o_pa_ns_strip  { flex-direction: column; }
+        .o_ps_heatmap   { grid-template-columns: 32px repeat(24, minmax(8px, 1fr)); }
+    }
+}

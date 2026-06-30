@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data noupdate="1">
+    <!-- Top-level: Head Office -->
+    <record id="room_office_hq" model="room.office">
+        <field name="name">ABB Headquarters</field>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <!-- Children of HQ -->
+    <record id="room_office_basement" model="room.office">
+        <field name="name">Basement Parking</field>
+        <field name="parent_id" ref="room_office_hq"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <record id="room_office_ground" model="room.office">
+        <field name="name">Ground Floor Parking</field>
+        <field name="parent_id" ref="room_office_hq"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <record id="room_office_visitor" model="room.office">
+        <field name="name">Visitor Parking</field>
+        <field name="parent_id" ref="room_office_hq"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <!-- Top-level: Branch -->
+    <record id="room_office_warehouse" model="room.office">
+        <field name="name">Bengaluru Branch</field>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+</data>
+</odoo>

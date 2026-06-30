@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.MyBookings">
+        <div class="o_my_bookings">
+            <t t-if="state.loading and !state.data">
+                <div class="o_ps_skeleton_page">
+                    <div class="o_ps_skeleton o_ps_sk_header"/>
+                    <div class="o_ps_skeleton o_ps_sk_subheader"/>
+                    <div class="o_ps_sk_kpi_row">
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                    </div>
+                    <div class="o_ps_skeleton o_ps_sk_tab_bar"/>
+                    <div class="o_ps_skeleton o_ps_sk_card_row"/>
+                    <div class="o_ps_skeleton o_ps_sk_card_row"/>
+                    <div class="o_ps_skeleton o_ps_sk_card_row"/>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_mb_header">
+                    <div>
+                        <h1>My Bookings</h1>
+                        <p>
+                            Manage your parking reservations
+                            <span class="o_ps_live_chip" title="Updates in real time">LIVE</span>
+                        </p>
+                    </div>
+                    <div class="o_mb_header_actions">
+                        <button class="btn o_mb_btn_quick" t-on-click="onQuickBook"
+                                title="One-click booking — allocator picks the best slot">
+                            <i class="fa fa-bolt"/>
+                            <span>Quick Book</span>
+                        </button>
+                        <button class="btn o_mb_btn_primary" t-on-click="onNewBooking">
+                            <i class="fa fa-plus"/>
+                            <span>New Booking</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI cards -->
+                <div class="o_mb_kpi_row o_ps_fade_stagger">
+                    <div class="o_mb_kpi_card">
+                        <div class="o_mb_kpi_icon o_mb_ic_blue"><i class="fa fa-calendar"/></div>
+                        <div class="o_mb_kpi_text">
+                            <div class="o_mb_kpi_value"><AnimatedCounter value="state.data.kpi.total"/></div>
+                            <div class="o_mb_kpi_label">Total Booked</div>
+                        </div>
+                    </div>
+                    <div class="o_mb_kpi_card">
+                        <div class="o_mb_kpi_icon o_mb_ic_green"><i class="fa fa-check-circle"/></div>
+                        <div class="o_mb_kpi_text">
+                            <div class="o_mb_kpi_value"><AnimatedCounter value="state.data.kpi.upcoming"/></div>
+                            <div class="o_mb_kpi_label">Upcoming</div>
+                        </div>
+                    </div>
+                    <div class="o_mb_kpi_card">
+                        <div class="o_mb_kpi_icon o_mb_ic_gray"><i class="fa fa-check"/></div>
+                        <div class="o_mb_kpi_text">
+                            <div class="o_mb_kpi_value"><AnimatedCounter value="state.data.kpi.completed"/></div>
+                            <div class="o_mb_kpi_label">Completed</div>
+                        </div>
+                    </div>
+                    <div class="o_mb_kpi_card">
+                        <div class="o_mb_kpi_icon o_mb_ic_red"><i class="fa fa-times-circle"/></div>
+                        <div class="o_mb_kpi_text">
+                            <div class="o_mb_kpi_value"><AnimatedCounter value="state.data.kpi.cancelled"/></div>
+                            <div class="o_mb_kpi_label">Cancelled</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Waitlist section (only shown if the user has waiting entries) -->
+                <div t-if="state.waitlist.length" class="o_mb_waitlist_block">
+                    <div class="o_mb_waitlist_head">
+                        <i class="fa fa-hourglass-half"/>
+                        <span>On the waitlist (<t t-esc="state.waitlist.length"/>)</span>
+                        <span class="o_mb_waitlist_sub">— you'll be auto-booked the moment a slot frees up</span>
+                    </div>
+                    <div class="o_mb_waitlist_rows">
+                        <t t-foreach="state.waitlist" t-as="w" t-key="w.id">
+                            <div class="o_mb_waitlist_card">
+                                <div class="o_mb_slot_tile o_mb_slot_tile_sm" t-att-style="'background:' + w.slot_color">
+                                    <i class="fa fa-hourglass-half"/>
+                                    <span t-esc="w.slot_initials"/>
+                                </div>
+                                <div class="o_mb_waitlist_body">
+                                    <div class="o_mb_waitlist_title">
+                                        <span class="fw-bold">Slot <t t-esc="w.slot_name"/></span>
+                                        <span class="text-muted"> · <t t-esc="w.section_name"/></span>
+                                        <span class="o_mb_waitlist_position">
+                                            <i class="fa fa-trophy"/> #<t t-esc="w.queue_position"/> in queue
+                                        </span>
+                                    </div>
+                                    <div class="o_mb_waitlist_meta">
+                                        <span><i class="fa fa-calendar-o"/><t t-esc="w.date_label"/></span>
+                                        <span><i class="fa fa-clock-o"/><t t-esc="w.time_range"/></span>
+                                        <span t-if="w.vehicle_number"><i class="fa fa-car"/><t t-esc="w.vehicle_number"/></span>
+                                    </div>
+                                </div>
+                                <button class="btn o_mb_btn_cancel" t-on-click="() => this.onLeaveWaitlist(w)">
+                                    <i class="fa fa-sign-out"/> Leave
+                                </button>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="o_mb_tabs">
+                    <button t-att-class="'o_mb_tab' + (state.activeTab === 'upcoming' ? ' o_mb_tab_active' : '')"
+                            t-on-click="() => this.setTab('upcoming')">
+                        Upcoming (<t t-esc="state.data.upcoming.length"/>)
+                    </button>
+                    <button t-att-class="'o_mb_tab' + (state.activeTab === 'past' ? ' o_mb_tab_active' : '')"
+                            t-on-click="() => this.setTab('past')">
+                        Past (<t t-esc="state.data.past.length"/>)
+                    </button>
+                </div>
+
+                <!-- Booking cards -->
+                <div class="o_mb_cards">
+                    <t t-foreach="visibleBookings" t-as="b" t-key="b.id + '_' + b.status">
+                        <div t-att-class="'o_mb_card o_mb_card_' + b.status">
+                            <div class="o_mb_card_stripe"/>
+                            <div class="o_mb_card_body">
+                                <div class="o_mb_card_left">
+                                    <div class="o_mb_slot_tile" t-att-style="'background:' + b.slot_color">
+                                        <i class="fa fa-car"/>
+                                        <span t-esc="b.slot_initials"/>
+                                    </div>
+                                    <div class="o_mb_card_title_block">
+                                        <div class="o_mb_card_title">Slot <t t-esc="b.slot_name"/></div>
+                                        <div class="o_mb_card_subtitle" t-esc="b.section_name"/>
+                                    </div>
+                                </div>
+                                <div class="o_mb_status_cluster">
+                                    <span t-if="b.is_guest_booking" class="o_mb_visitor_chip">
+                                        <i class="fa fa-user-plus"/> Visitor
+                                    </span>
+                                    <div t-att-class="'o_mb_status_chip o_mb_chip_' + b.status">
+                                        <span class="o_mb_chip_dot"/>
+                                        <t t-if="b.booking_state === 'pending_approval'">Pending approval</t>
+                                        <t t-elif="b.booking_state === 'checked_in'">In use</t>
+                                        <t t-elif="b.status === 'upcoming'">Upcoming</t>
+                                        <t t-elif="b.status === 'completed'">Completed</t>
+                                        <t t-elif="b.status === 'no_show'">No-show</t>
+                                        <t t-else="">Cancelled</t>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_mb_meta_row">
+                                <span class="o_mb_meta"><i class="fa fa-calendar-o"/><t t-esc="b.date_label"/></span>
+                                <span class="o_mb_meta"><i class="fa fa-clock-o"/><t t-esc="b.time_range"/></span>
+                                <span t-if="b.vehicle_number" class="o_mb_meta"><i class="fa fa-car"/><t t-esc="b.vehicle_number"/></span>
+                                <span t-if="b.is_in_series" class="o_mb_meta o_mb_meta_recurring">
+                                    <i class="fa fa-refresh"/>
+                                    <t t-esc="b.recurrence_label"/>
+                                    · <t t-esc="b.series_size"/> bookings
+                                </span>
+                                <span t-elif="b.is_recurring" class="o_mb_meta o_mb_meta_recurring">
+                                    <i class="fa fa-refresh"/><t t-esc="b.recurrence_label"/>
+                                </span>
+                            </div>
+                            <div t-if="b.status === 'upcoming'" class="o_mb_actions">
+                                <button t-if="b.can_check_in"
+                                        class="btn o_mb_btn_check_in"
+                                        t-on-click="() => this.onCheckIn(b)">
+                                    <i class="fa fa-sign-in"/> Check In
+                                </button>
+                                <button class="btn o_mb_btn_edit" t-on-click="() => this.onEdit(b.id)">
+                                    <i class="fa fa-pencil"/> Edit
+                                </button>
+                                <button class="btn o_mb_btn_cancel" t-on-click="() => this.onCancel(b)">
+                                    <i class="fa fa-trash"/> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="!visibleBookings.length">
+                        <div class="o_mb_empty">
+                            <i class="fa fa-calendar-o"/>
+                            <p t-if="state.activeTab === 'upcoming'">No upcoming bookings. Click "New Booking" to reserve a slot.</p>
+                            <p t-else="">No past bookings yet.</p>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

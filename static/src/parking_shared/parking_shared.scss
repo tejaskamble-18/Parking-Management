@@ -1,0 +1,298 @@
+/* Shared design tokens + utilities for the ParkSmart UI.
+   Loaded before the individual client-action stylesheets. */
+
+/* ---------- Design tokens ---------- */
+:root {
+    --ps-bg:           #F8FAFC;
+    --ps-surface:      #FFFFFF;
+    --ps-border:       #E5E7EB;
+    --ps-text:         #0F172A;
+    --ps-muted:        #64748B;
+    --ps-primary:      #2563EB;
+    --ps-primary-hover: #1D4ED8;
+    --ps-skeleton-bg:  #EEF2F7;
+    --ps-skeleton-hi:  #F8FAFC;
+    --ps-shadow-sm:    0 1px 2px rgba(15, 23, 42, 0.04);
+    --ps-shadow-md:    0 8px 24px rgba(15, 23, 42, 0.06);
+    --ps-shadow-lg:    0 16px 40px rgba(15, 23, 42, 0.10);
+}
+
+/* ---------- Animated counter ---------- */
+.o_anim_counter {
+    display: inline-block;
+    font-variant-numeric: tabular-nums; /* no width jitter as digits tick */
+}
+
+/* ---------- Skeleton loader ---------- */
+@keyframes o_ps_shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+.o_ps_skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ps-skeleton-bg) 0%,
+        var(--ps-skeleton-hi) 50%,
+        var(--ps-skeleton-bg) 100%
+    );
+    background-size: 800px 100%;
+    animation: o_ps_shimmer 1.4s infinite linear;
+    border-radius: 6px;
+    display: block;
+}
+.o_ps_skeleton_row { display: flex; gap: 14px; margin-bottom: 14px; }
+
+/* Dashboard-shaped skeleton scaffold */
+.o_ps_skeleton_page {
+    padding: 24px 28px 40px;
+    .o_ps_sk_header {
+        height: 32px; width: 280px; margin-bottom: 8px;
+    }
+    .o_ps_sk_subheader {
+        height: 14px; width: 360px; margin-bottom: 22px;
+    }
+    .o_ps_sk_kpi_row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .o_ps_sk_kpi {
+        height: 78px;
+        border-radius: 14px;
+    }
+    .o_ps_sk_block {
+        height: 180px;
+        border-radius: 14px;
+        margin-bottom: 14px;
+    }
+    .o_ps_sk_card_row {
+        height: 140px;
+        border-radius: 14px;
+        margin-bottom: 12px;
+    }
+    .o_ps_sk_tab_bar {
+        height: 40px;
+        width: 220px;
+        border-radius: 10px;
+        margin-bottom: 14px;
+    }
+    .o_ps_sk_chart_row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    .o_ps_sk_chart {
+        height: 260px;
+        border-radius: 14px;
+    }
+    .o_ps_sk_toolbar {
+        height: 44px;
+        border-radius: 10px;
+        margin-bottom: 14px;
+    }
+    .o_ps_sk_table {
+        height: 460px;
+        border-radius: 14px;
+    }
+}
+@media (max-width: 1100px) {
+    .o_ps_skeleton_page .o_ps_sk_chart_row { grid-template-columns: 1fr; }
+}
+
+/* ---------- Glass hero panel ---------- */
+.o_ps_glass_hero {
+    position: relative;
+    border-radius: 18px;
+    padding: 24px 28px;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.28), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.30), transparent 55%),
+        radial-gradient(circle at 50% 100%, rgba(20, 184, 166, 0.25), transparent 55%),
+        linear-gradient(135deg, #0F172A, #1E293B);
+    color: #F8FAFC;
+    overflow: hidden;
+    box-shadow: var(--ps-shadow-lg);
+    &::after {
+        /* Subtle grid overlay for extra depth */
+        content: "";
+        position: absolute; inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+    }
+}
+.o_ps_glass_card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: #F8FAFC;
+    transition: transform .15s ease, background .15s ease;
+    &:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+}
+
+/* ---------- Fade-in on mount ---------- */
+@keyframes o_ps_fadeup {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+.o_ps_fade_in {
+    animation: o_ps_fadeup .35s ease both;
+}
+.o_ps_fade_stagger > * {
+    animation: o_ps_fadeup .4s ease both;
+}
+.o_ps_fade_stagger > *:nth-child(1) { animation-delay: 0ms; }
+.o_ps_fade_stagger > *:nth-child(2) { animation-delay: 50ms; }
+.o_ps_fade_stagger > *:nth-child(3) { animation-delay: 100ms; }
+.o_ps_fade_stagger > *:nth-child(4) { animation-delay: 150ms; }
+.o_ps_fade_stagger > *:nth-child(5) { animation-delay: 200ms; }
+.o_ps_fade_stagger > *:nth-child(6) { animation-delay: 250ms; }
+
+/* ---------- Focus-visible (accessibility) ----------
+   Applied to every interactive element inside the ParkSmart surfaces. */
+.o_parking_dashboard,
+.o_parking_analytics,
+.o_my_bookings,
+.o_admin_panel {
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible,
+    [role="button"]:focus-visible {
+        outline: 2px solid var(--ps-primary);
+        outline-offset: 2px;
+        border-radius: 8px;
+    }
+}
+
+/* Native <select> chevron consistency — match card styling everywhere. */
+.o_parking_dashboard select,
+.o_parking_analytics select,
+.o_my_bookings select,
+.o_admin_panel select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+/* ---------- Motion reduction (accessibility) ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .o_ps_skeleton,
+    .o_ps_fade_in,
+    .o_ps_fade_stagger > * {
+        animation: none !important;
+    }
+    .o_anim_counter { transition: none !important; }
+}
+
+/* ---------- Hover-only lift (no sticky hover on touch) ---------- */
+@media (hover: none) {
+    .o_ps_glass_card:hover { transform: none; }
+}
+
+/* ---------- Live-update pulse (bus-driven state changes) ----------
+   Added to a card/row for ~1s after a bus notification arrives, so users
+   notice the dashboard just updated without a full re-render flash. */
+@keyframes o_ps_live_pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+    70%  { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+.o_ps_live_pulse {
+    animation: o_ps_live_pulse 1.1s ease-out;
+}
+
+/* ---------- "Live" chip for dashboards that subscribe to the bus ---------- */
+.o_ps_live_chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #065F46;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    &::before {
+        content: "";
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: o_ps_dot_pulse 1.8s infinite;
+    }
+}
+@keyframes o_ps_dot_pulse {
+    0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.7); }
+    70%  { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);   }
+    100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0);   }
+}
+
+/* ---------- Heatmap cells (used in Analytics) ---------- */
+.o_ps_heatmap {
+    display: grid;
+    gap: 3px;
+    margin-top: 8px;
+    /* 1 label col + 24 data cols */
+    grid-template-columns: 34px repeat(24, 1fr);
+}
+.o_ps_heatmap_label {
+    font-size: 11px;
+    color: var(--ps-muted, #64748B);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 6px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+}
+.o_ps_heatmap_cell {
+    height: 22px;
+    border-radius: 4px;
+    background: #F1F5F9;
+    cursor: default;
+    transition: transform .1s ease;
+    &:hover { transform: scale(1.15); }
+}
+.o_ps_heatmap_axis {
+    grid-column: 2 / -1;
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    font-size: 10px;
+    color: var(--ps-muted, #64748B);
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* ---------- Mobile bottom-sheet hooks ---------- */
+@media (max-width: 768px) {
+    .o_parking_dashboard .o_parking_body {
+        flex-direction: column !important;
+        .o_parking_rail { width: 100% !important; }
+    }
+}
+
+/* Parking map image on the Parking Location form */
+.o_parking_map_image img {
+    max-width: 100%;
+    max-height: 480px;
+    border: 1px solid var(--ps-border);
+    border-radius: 6px;
+    box-shadow: var(--ps-shadow-sm);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.o_parking_map_image:hover img {
+    box-shadow: var(--ps-shadow-md);
+    transform: scale(1.005);
+}

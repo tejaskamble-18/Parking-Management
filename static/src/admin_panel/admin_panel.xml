@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.AdminPanel">
+        <div class="o_admin_panel">
+            <t t-if="state.loading and !state.data">
+                <div class="o_ps_skeleton_page">
+                    <div class="o_ps_skeleton o_ps_sk_header"/>
+                    <div class="o_ps_skeleton o_ps_sk_subheader"/>
+                    <div class="o_ps_sk_kpi_row">
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                    </div>
+                    <div class="o_ps_skeleton o_ps_sk_toolbar"/>
+                    <div class="o_ps_skeleton o_ps_sk_table"/>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_ap_header">
+                    <div>
+                        <h1><i class="fa fa-shield me-2"/> Admin Panel</h1>
+                        <p>
+                            Manage slots, bookings, and user access
+                            <span class="o_ps_live_chip">LIVE</span>
+                        </p>
+                    </div>
+                    <button class="btn o_ap_btn_primary" t-on-click="onAddSlot">
+                        <i class="fa fa-plus"/>
+                        <span>Add Slot</span>
+                    </button>
+                </div>
+
+                <!-- KPI row -->
+                <div class="o_ap_kpi_row o_ps_fade_stagger">
+                    <div class="o_ap_kpi_card">
+                        <div class="o_ap_kpi_value"><AnimatedCounter value="state.data.kpi.total"/></div>
+                        <div class="o_ap_kpi_label">Total Slots</div>
+                    </div>
+                    <div class="o_ap_kpi_card">
+                        <div class="o_ap_kpi_value o_ap_kpi_green">
+                            <AnimatedCounter value="state.data.kpi.available"/>
+                        </div>
+                        <div class="o_ap_kpi_label">Available</div>
+                    </div>
+                    <div class="o_ap_kpi_card">
+                        <div class="o_ap_kpi_value o_ap_kpi_red">
+                            <AnimatedCounter value="state.data.kpi.occupied"/>
+                        </div>
+                        <div class="o_ap_kpi_label">Occupied</div>
+                    </div>
+                    <div class="o_ap_kpi_card">
+                        <div class="o_ap_kpi_value o_ap_kpi_amber">
+                            <AnimatedCounter value="state.data.kpi.reserved"/>
+                        </div>
+                        <div class="o_ap_kpi_label">Reserved</div>
+                    </div>
+                </div>
+
+                <!-- Tab bar + filters -->
+                <div class="o_ap_toolbar">
+                    <div class="o_ap_tabs">
+                        <button t-att-class="'o_ap_tab' + (state.activeTab === 'slots' ? ' o_ap_tab_active' : '')"
+                                t-on-click="() => this.setTab('slots')">
+                            Slot Management
+                        </button>
+                        <button t-att-class="'o_ap_tab' + (state.activeTab === 'overrides' ? ' o_ap_tab_active' : '')"
+                                t-on-click="() => this.setTab('overrides')">
+                            Booking Overrides
+                        </button>
+                    </div>
+                    <div class="o_ap_filters">
+                        <div class="o_ap_search">
+                            <i class="fa fa-search"/>
+                            <input type="text" placeholder="Search..." t-att-value="state.search" t-on-input="onSearch"/>
+                        </div>
+                        <select class="o_ap_select" t-on-change="onStatusChange">
+                            <option value="all">All Status</option>
+                            <option value="available" t-att-selected="state.statusFilter === 'available'">Available</option>
+                            <option value="occupied" t-att-selected="state.statusFilter === 'occupied'">Occupied</option>
+                            <option value="reserved" t-att-selected="state.statusFilter === 'reserved'">Reserved</option>
+                        </select>
+                        <select class="o_ap_select" t-on-change="onSectionChange">
+                            <option value="all">All Sections</option>
+                            <t t-foreach="state.data.sections" t-as="sec" t-key="sec.id">
+                                <option t-att-value="sec.id" t-att-selected="(sec.id + '') === (state.sectionFilter + '')">
+                                    <t t-esc="sec.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Slot Management tab -->
+                <div t-if="state.activeTab === 'slots'" class="o_ap_card">
+                    <!-- Phase 4: bulk-action bar, only visible when rows selected -->
+                    <div t-if="selectedSlotCount" class="o_ap_bulk_bar">
+                        <span class="o_ap_bulk_count">
+                            <i class="fa fa-check-square-o"/>
+                            <t t-esc="selectedSlotCount"/> selected
+                        </span>
+                        <button class="btn o_ap_bulk_btn"
+                                t-on-click="() => this.onBulkToggleSlots(false)">
+                            <i class="fa fa-ban"/> Block
+                        </button>
+                        <button class="btn o_ap_bulk_btn o_ap_bulk_primary"
+                                t-on-click="() => this.onBulkToggleSlots(true)">
+                            <i class="fa fa-check"/> Unblock
+                        </button>
+                        <button class="btn o_ap_bulk_btn_link" t-on-click="clearSlotSelection">
+                            Clear
+                        </button>
+                    </div>
+                    <table class="o_ap_table">
+                        <thead>
+                            <tr>
+                                <th class="o_ap_check_col"/>
+                                <th>SLOT</th>
+                                <th>SECTION</th>
+                                <th>STATUS</th>
+                                <th>FEATURES</th>
+                                <th>CURRENTLY BOOKED BY</th>
+                                <th>TIME</th>
+                                <th class="text-end">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="state.data.slots" t-as="s" t-key="s.id">
+                                <tr t-att-class="{'o_ap_row_selected': state.selectedSlotIds[s.id]}"
+                                    t-on-click="(ev) => this.toggleSlotSelect(s.id, ev)">
+                                    <td class="o_ap_check_col">
+                                        <input type="checkbox" class="o_ap_check"
+                                               t-att-checked="state.selectedSlotIds[s.id] or false"
+                                               t-on-click.stop="(ev) => this.toggleSlotSelect(s.id, ev)"/>
+                                    </td>
+                                    <td>
+                                        <div class="o_ap_slot_cell">
+                                            <div class="o_ap_slot_tile"><i class="fa fa-car"/></div>
+                                            <span class="o_ap_slot_code" t-esc="s.name"/>
+                                        </div>
+                                    </td>
+                                    <td><span class="o_ap_section_chip" t-esc="s.section_name"/></td>
+                                    <td>
+                                        <span t-att-class="'o_ap_status_pill o_ap_status_' + s.status">
+                                            <span class="o_ap_status_dot"/>
+                                            <t t-if="s.status === 'available'">Available</t>
+                                            <t t-elif="s.status === 'occupied'">Occupied</t>
+                                            <t t-else="">Reserved</t>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="o_ap_features">
+                                            <i t-if="s.is_accessible" class="fa fa-wheelchair" style="color:#8B5CF6" title="Accessible"/>
+                                            <span t-if="s.is_ev" class="o_ap_ev_pill"><i class="fa fa-bolt"/> EV</span>
+                                            <span t-if="s.is_premium" class="o_ap_premium_pill"><i class="fa fa-star"/> VIP</span>
+                                            <span t-if="!s.is_accessible and !s.is_ev and !s.is_premium" class="text-muted">—</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <t t-if="s.booker_name">
+                                            <div class="o_ap_user">
+                                                <span class="o_ap_avatar" t-esc="s.booker_initials"/>
+                                                <span class="o_ap_user_name" t-esc="s.booker_name"/>
+                                            </div>
+                                        </t>
+                                        <t t-else=""><span class="text-muted">—</span></t>
+                                    </td>
+                                    <td>
+                                        <span t-if="s.time_range" t-esc="s.time_range"/>
+                                        <span t-else="" class="text-muted">—</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="o_ap_action_group">
+                                            <button class="o_ap_icon_btn" t-on-click="() => this.onEditSlot(s.id)" title="Edit slot" aria-label="Edit slot">
+                                                <i class="fa fa-pencil" aria-hidden="true"/>
+                                            </button>
+                                            <button class="o_ap_icon_btn" t-on-click="() => this.onViewSlotBookings(s)" title="View bookings" aria-label="View bookings for this slot">
+                                                <i class="fa fa-list" aria-hidden="true"/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="!state.data.slots.length">
+                                <tr><td colspan="8" class="text-center text-muted py-4">No slots match these filters.</td></tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Booking Overrides tab -->
+                <div t-if="state.activeTab === 'overrides'" class="o_ap_card">
+                    <div t-if="selectedBookingCount" class="o_ap_bulk_bar">
+                        <span class="o_ap_bulk_count">
+                            <i class="fa fa-check-square-o"/>
+                            <t t-esc="selectedBookingCount"/> selected
+                        </span>
+                        <button class="btn o_ap_bulk_btn o_ap_bulk_danger"
+                                t-on-click="onBulkCancelBookings">
+                            <i class="fa fa-ban"/> Cancel Bookings
+                        </button>
+                        <button class="btn o_ap_bulk_btn_link" t-on-click="clearBookingSelection">
+                            Clear
+                        </button>
+                    </div>
+                    <table class="o_ap_table">
+                        <thead>
+                            <tr>
+                                <th class="o_ap_check_col"/>
+                                <th>BOOKING</th>
+                                <th>SLOT</th>
+                                <th>BOOKED BY</th>
+                                <th>VEHICLE</th>
+                                <th>TIME</th>
+                                <th>STATUS</th>
+                                <th class="text-end">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="state.data.overrides" t-as="b" t-key="b.id">
+                                <tr t-att-class="(!b.active ? 'o_ap_row_cancelled' : '') + (state.selectedBookingIds[b.id] ? ' o_ap_row_selected' : '')"
+                                    t-on-click="(ev) => b.active and b.status !== 'completed' and this.toggleBookingSelect(b.id, ev)">
+                                    <td class="o_ap_check_col">
+                                        <input type="checkbox" class="o_ap_check"
+                                               t-att-checked="state.selectedBookingIds[b.id] or false"
+                                               t-att-disabled="!b.active or b.status === 'completed'"
+                                               t-on-click.stop="(ev) => this.toggleBookingSelect(b.id, ev)"/>
+                                    </td>
+                                    <td class="fw-bold" t-esc="b.name"/>
+                                    <td>
+                                        <span class="o_ap_section_chip" t-esc="b.section_name + ' - ' + b.slot_name"/>
+                                    </td>
+                                    <td>
+                                        <t t-if="b.booker_name" t-esc="b.booker_name"/>
+                                        <span t-else="" class="text-muted">—</span>
+                                    </td>
+                                    <td>
+                                        <t t-if="b.vehicle_number" t-esc="b.vehicle_number"/>
+                                        <span t-else="" class="text-muted">—</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="b.start_label"/> - <span t-esc="b.stop_label"/>
+                                    </td>
+                                    <td>
+                                        <span t-att-class="'o_ap_status_pill o_ap_status_' + b.status + (!b.active ? ' o_ap_status_cancelled' : '')">
+                                            <span class="o_ap_status_dot"/>
+                                            <t t-if="!b.active">Cancelled</t>
+                                            <t t-elif="b.status === 'upcoming'">Upcoming</t>
+                                            <t t-elif="b.status === 'occupied'">Ongoing</t>
+                                            <t t-else="">Completed</t>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="o_ap_action_group">
+                                            <button class="o_ap_icon_btn" t-on-click="() => this.onEditBooking(b.id)" title="Edit booking" aria-label="Edit booking">
+                                                <i class="fa fa-pencil" aria-hidden="true"/>
+                                            </button>
+                                            <button t-if="b.active and b.status !== 'completed'"
+                                                    class="o_ap_icon_btn o_ap_icon_danger"
+                                                    t-on-click="() => this.onCancelBooking(b)"
+                                                    title="Force cancel"
+                                                    aria-label="Force-cancel this booking">
+                                                <i class="fa fa-ban" aria-hidden="true"/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="!state.data.overrides.length">
+                                <tr><td colspan="8" class="text-center text-muted py-4">No recent bookings.</td></tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

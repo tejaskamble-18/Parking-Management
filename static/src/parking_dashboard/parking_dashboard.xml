@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="room.ParkingDashboard">
+        <div class="o_parking_dashboard">
+            <t t-if="state.loading and !state.data">
+                <div class="o_ps_skeleton_page">
+                    <div class="o_ps_skeleton o_ps_sk_header"/>
+                    <div class="o_ps_skeleton o_ps_sk_subheader"/>
+                    <div class="o_ps_sk_kpi_row">
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                        <div class="o_ps_skeleton o_ps_sk_kpi"/>
+                    </div>
+                    <div class="o_ps_skeleton o_ps_sk_block"/>
+                    <div class="o_ps_skeleton o_ps_sk_block"/>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_ps_glass_hero o_parking_hero o_ps_fade_in">
+                    <div class="o_parking_header">
+                        <div class="o_parking_header_title">
+                            <h1>Parking Dashboard</h1>
+                            <p t-if="!state.selectedOfficeId">Real-time slot availability and management</p>
+                            <p t-else="">
+                                Showing: <t t-esc="state.offices.find(o => o.id === state.selectedOfficeId)?.name || 'Selected Location'"/>
+                            </p>
+                        </div>
+                        <div class="o_parking_header_actions">
+                            <div class="o_parking_date_pill o_parking_date_pill_glass">
+                                <i class="fa fa-calendar"/>
+                                <span>Today, <t t-esc="state.data.today_label"/></span>
+                            </div>
+                            <span class="o_ps_live_chip" title="Dashboard updates in real time">LIVE</span>
+                            <div class="o_parking_location_filter">
+                                <i class="fa fa-map-marker"/>
+                                <select t-on-change="onLocationChange">
+                                    <option value="" t-att-selected="!state.selectedOfficeId">All Locations</option>
+                                    <t t-foreach="state.offices" t-as="office" t-key="office.id">
+                                        <option t-att-value="office.id"
+                                                t-att-selected="state.selectedOfficeId === office.id"
+                                                t-esc="office.name"/>
+                                    </t>
+                                </select>
+                            </div>
+                            <button class="btn o_parking_btn_glass" t-on-click="onRefresh" title="Refresh" aria-label="Refresh dashboard">
+                                <i class="fa fa-refresh" aria-hidden="true"/>
+                            </button>
+                            <button class="btn o_parking_btn_primary" t-on-click="() => this.onBookSlot()"
+                                    title="One-click book — allocator picks the best slot">
+                                <i class="fa fa-bolt"/>
+                                <span>Quick Book</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="o_parking_kpi_row o_ps_fade_stagger">
+                        <div class="o_ps_glass_card o_parking_kpi_card_glass">
+                            <div class="o_parking_kpi_icon o_kpi_icon_total"><i class="fa fa-car"/></div>
+                            <div class="o_parking_kpi_text">
+                                <div class="o_parking_kpi_label">Total Slots</div>
+                                <div class="o_parking_kpi_value">
+                                    <AnimatedCounter value="state.data.kpi.total"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_ps_glass_card o_parking_kpi_card_glass">
+                            <div class="o_parking_kpi_icon o_kpi_icon_available"><i class="fa fa-check-circle"/></div>
+                            <div class="o_parking_kpi_text">
+                                <div class="o_parking_kpi_label">Available</div>
+                                <div class="o_parking_kpi_value">
+                                    <AnimatedCounter value="state.data.kpi.available"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_ps_glass_card o_parking_kpi_card_glass">
+                            <div class="o_parking_kpi_icon o_kpi_icon_occupied"><i class="fa fa-times-circle"/></div>
+                            <div class="o_parking_kpi_text">
+                                <div class="o_parking_kpi_label">Occupied</div>
+                                <div class="o_parking_kpi_value">
+                                    <AnimatedCounter value="state.data.kpi.occupied"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div t-if="state.data.is_manager" class="o_ps_glass_card o_parking_kpi_card_glass">
+                            <div class="o_parking_kpi_icon o_kpi_icon_util"><i class="fa fa-line-chart"/></div>
+                            <div class="o_parking_kpi_text">
+                                <div class="o_parking_kpi_label">Utilization</div>
+                                <div class="o_parking_kpi_value">
+                                    <AnimatedCounter value="state.data.kpi.utilization" suffix="'%'"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_parking_body">
+                    <div class="o_parking_main">
+
+                        <div t-if="state.data.is_manager" class="o_parking_capacity_card">
+                            <div class="o_parking_capacity_head">
+                                <span class="o_parking_capacity_title">Lot Capacity</span>
+                                <span class="o_parking_capacity_count">
+                                    <t t-esc="state.data.kpi.occupied + state.data.kpi.reserved"/>
+                                    / <t t-esc="state.data.kpi.total"/> occupied
+                                </span>
+                            </div>
+                            <div class="o_parking_capacity_bar">
+                                <div class="o_parking_cap_occupied"
+                                     t-att-style="'width:' + state.data.lot_capacity.pct_occupied + '%'"/>
+                                <div class="o_parking_cap_reserved"
+                                     t-att-style="'width:' + state.data.lot_capacity.pct_reserved + '%'"/>
+                                <div class="o_parking_cap_available"
+                                     t-att-style="'width:' + state.data.lot_capacity.pct_available + '%'"/>
+                            </div>
+                            <div class="o_parking_capacity_legend">
+                                <span class="o_legend_dot o_dot_available"/>Available (<t t-esc="state.data.lot_capacity.available"/>)
+                                <span class="o_legend_dot o_dot_occupied"/>Occupied (<t t-esc="state.data.lot_capacity.occupied"/>)
+                                <span class="o_legend_dot o_dot_reserved"/>Reserved (<t t-esc="state.data.lot_capacity.reserved"/>)
+                            </div>
+                        </div>
+
+                        <div class="o_parking_map_heading">
+                            <span class="o_parking_map_label">Parking Map</span>
+                            <span class="o_parking_map_legend_item"><i class="fa fa-bolt text-primary"/> EV Charging</span>
+                            <span class="o_parking_map_legend_item"><i class="fa fa-wheelchair" style="color:#8B5CF6"/> Accessible</span>
+                            <span class="o_parking_map_legend_item"><i class="fa fa-star" style="color:#F59E0B"/> Premium</span>
+                        </div>
+
+                        <div class="o_parking_sections" t-att-class="{'o_ps_live_pulse': state.livePulse}" t-att-key="'sections-' + state.livePulse">
+                            <t t-foreach="state.data.sections" t-as="section" t-key="section.id">
+                                <div class="o_parking_section" t-att-class="{'o_parking_section_premium': section.is_premium_section}">
+                                    <div class="o_parking_section_head">
+                                        <span class="o_parking_section_dot" t-att-style="'background:' + section.color"/>
+                                        <span class="o_parking_section_name">
+                                            <t t-if="section.is_premium_section"><i class="fa fa-star me-1" style="color:#F59E0B"/></t>
+                                            <t t-esc="section.name"/>
+                                        </span>
+                                        <span class="o_parking_section_count">
+                                            <span class="o_parking_free_chip"><t t-esc="section.free"/> free</span>
+                                            <span class="o_parking_total_chip"><t t-esc="section.total"/> total</span>
+                                        </span>
+                                    </div>
+                                    <div class="o_parking_slot_grid">
+                                        <t t-foreach="section.slots" t-as="slot" t-key="slot.id">
+                                            <div t-att-class="'o_parking_slot o_status_' + slot.status + (state.selectedSlot and state.selectedSlot.id === slot.id ? ' o_selected' : '') + (slot.is_premium ? ' o_premium' : '')"
+                                                 t-on-click="() => this.onSelectSlot(slot)"
+                                                 t-on-dblclick="() => this.onBookSlot(slot)"
+                                                 t-att-title="slot.name + ' · ' + slot.status.toUpperCase() + (slot.booker ? ' · ' + slot.booker : '') + (slot.time ? ' (' + slot.time + ')' : '')">
+                                                <div class="o_parking_slot_head">
+                                                    <span class="o_parking_slot_code" t-esc="slot.name"/>
+                                                    <span class="o_parking_slot_dot"/>
+                                                </div>
+                                                <div class="o_parking_slot_status" t-esc="slot.status.toUpperCase()"/>
+                                                <div t-if="slot.booker" class="o_parking_slot_booker" t-esc="slot.booker"/>
+                                                <div t-if="slot.time" class="o_parking_slot_time" t-esc="slot.time"/>
+                                                <div class="o_parking_slot_icons">
+                                                    <i t-if="slot.is_ev" class="fa fa-bolt" title="EV Charging"/>
+                                                    <i t-if="slot.is_accessible" class="fa fa-wheelchair" title="Accessible"/>
+                                                    <span t-if="slot.is_premium" class="o_parking_vip_badge">★ VIP</span>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-if="!state.data.sections.length">
+                                <div class="o_parking_empty">
+                                    <i class="fa fa-car"/>
+                                    <p>No parking slots yet. Create some from the Parking Slots menu.</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <aside class="o_parking_rail">
+                        <div t-if="state.data.is_manager" class="o_parking_rail_card">
+                            <div class="o_parking_rail_title">Today's Summary</div>
+                            <div class="o_parking_donut_wrap">
+                                <svg viewBox="0 0 100 100" class="o_parking_donut">
+                                    <circle cx="50" cy="50" r="42" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+                                    <circle cx="50" cy="50" r="42" fill="none" stroke="#2563EB" stroke-width="7"
+                                            stroke-linecap="round"
+                                            t-att-stroke-dasharray="donutStrokeDasharray"
+                                            transform="rotate(-90 50 50)"/>
+                                </svg>
+                                <div class="o_parking_donut_text">
+                                    <div class="o_parking_donut_value"><t t-esc="state.data.summary.utilization"/>%</div>
+                                    <div class="o_parking_donut_label">Used</div>
+                                </div>
+                            </div>
+                            <div class="o_parking_section_progress">
+                                <t t-foreach="state.data.summary.sections" t-as="s" t-key="s.name">
+                                    <div class="o_parking_progress_row">
+                                        <div class="o_parking_progress_head">
+                                            <span t-esc="s.name"/>
+                                            <span><t t-esc="s.percent"/>%</span>
+                                        </div>
+                                        <div class="o_parking_progress_bar">
+                                            <div class="o_parking_progress_fill"
+                                                 t-att-style="'width:' + s.percent + '%;background:' + s.color"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <div class="o_parking_rail_card">
+                            <div class="o_parking_rail_title">Slot Detail</div>
+                            <div t-if="!state.selectedSlot" class="o_parking_detail_empty">
+                                <i class="fa fa-info-circle"/>
+                                <span>Click any slot to view details</span>
+                            </div>
+                            <div t-else="" class="o_parking_detail">
+                                <div class="o_parking_detail_head">
+                                    <span class="o_parking_detail_name" t-esc="state.selectedSlot.name"/>
+                                    <span t-att-class="'o_parking_detail_chip o_status_' + state.selectedSlot.status" t-esc="state.selectedSlot.status.toUpperCase()"/>
+                                </div>
+                                <div t-if="state.selectedSlot.location" class="o_parking_detail_row">
+                                    <i class="fa fa-map-marker"/><span t-esc="state.selectedSlot.location"/>
+                                </div>
+                                <div t-if="state.selectedSlot.booker" class="o_parking_detail_row">
+                                    <i class="fa fa-user"/><span t-esc="state.selectedSlot.booker"/>
+                                </div>
+                                <div t-if="state.selectedSlot.time" class="o_parking_detail_row">
+                                    <i class="fa fa-clock-o"/><span t-esc="state.selectedSlot.time"/>
+                                </div>
+                                <div class="o_parking_detail_features">
+                                    <span t-if="state.selectedSlot.is_ev" class="o_parking_feature_pill o_pill_ev"><i class="fa fa-bolt"/> EV</span>
+                                    <span t-if="state.selectedSlot.is_accessible" class="o_parking_feature_pill o_pill_access"><i class="fa fa-wheelchair"/> Accessible</span>
+                                    <span t-if="state.selectedSlot.is_premium" class="o_parking_feature_pill o_pill_premium"><i class="fa fa-star"/> Premium</span>
+                                </div>
+                                <button class="btn o_parking_btn_primary o_parking_detail_btn"
+                                        t-on-click="() => this.onBookSlot(state.selectedSlot)">
+                                    <i class="fa fa-plus"/> Book This Slot
+                                </button>
+                                <button t-if="state.selectedSlot.status !== 'free'"
+                                        class="btn o_parking_btn_waitlist"
+                                        t-on-click="() => this.onJoinWaitlist(state.selectedSlot)">
+                                    <i class="fa fa-hourglass-half"/> Join Waitlist
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="o_parking_rail_card">
+                            <div class="o_parking_rail_title">Quick Stats</div>
+                            <div class="o_parking_qs_row">
+                                <span><i class="fa fa-bolt text-primary"/> EV Spots</span>
+                                <span class="o_parking_qs_value"><t t-esc="state.data.quick_stats.ev_spots"/> total</span>
+                            </div>
+                            <div class="o_parking_qs_row">
+                                <span><i class="fa fa-wheelchair" style="color:#8B5CF6"/> Accessible</span>
+                                <span class="o_parking_qs_value"><t t-esc="state.data.quick_stats.accessible"/> total</span>
+                            </div>
+                            <div t-if="state.data.is_manager" class="o_parking_qs_row">
+                                <span><i class="fa fa-users" style="color:#10B981"/> Active users</span>
+                                <span class="o_parking_qs_value"><t t-esc="state.data.quick_stats.active_users"/> today</span>
+                            </div>
+                        </div>
+
+                        <SmartSuggest/>
+                    </aside>
+                </div>
+
+                <!-- Mobile-only floating action button: one-tap Quick Book on
+                     phones. Hidden on desktop where the header button suffices. -->
+                <button class="o_parking_fab" t-on-click="() => this.onBookSlot()"
+                        aria-label="Quick book a parking slot">
+                    <i class="fa fa-bolt"/>
+                </button>
+            </t>
+        </div>
+    </t>
+
+</templates>
